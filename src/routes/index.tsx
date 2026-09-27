@@ -1,12 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-import {
-  ACTIVE_KEY,
-  DOCUMENTS_KEY,
-  newDocument,
-  readDocuments,
-} from '#/features/editor/components/resume-editor'
+import { resumeRepository } from '#/db/repositories/resume-repository'
+import { createStarterDocument } from '#/features/editor/starter-content'
+import { loadResumes } from '#/features/resume/services/resume-storage'
 import type { ResumeDocument } from '#/models/resume'
 
 export const Route = createFileRoute('/')({ component: Dashboard })
@@ -34,65 +31,73 @@ function Dashboard() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      setDocuments(sortByModifiedTime(readDocuments()))
-    } catch {
-      setError('Saved resumes could not be loaded.')
-    } finally {
-      setLoading(false)
-    }
+    loadResumes()
+      .then((loaded) => setDocuments(sortByModifiedTime(loaded)))
+      .catch(() =>
+        setError('Saved resumes could not be loaded from IndexedDB.'),
+      )
+      .finally(() => setLoading(false))
   }, [])
 
-  function persist(nextDocuments: ResumeDocument[]) {
-    window.localStorage.setItem(DOCUMENTS_KEY, JSON.stringify(nextDocuments))
-    setDocuments(nextDocuments)
-  }
-
-  function createResume() {
-    const created = newDocument(`Resume ${documents.length + 1}`)
-    persist([...documents, created])
-    window.localStorage.setItem(ACTIVE_KEY, created.id)
-    void navigate({ to: '/editor/$resumeId', params: { resumeId: created.id } })
+  async function createResume() {
+    try {
+      const created = createStarterDocument('Resume ' + (documents.length + 1))
+      await resumeRepository.create(created)
+      void navigate({
+        to: '/editor/$resumeId',
+        params: { resumeId: created.id },
+      })
+    } catch {
+      setError('The new resume could not be created.')
+    }
   }
 
   function openResume(document: ResumeDocument) {
-    window.localStorage.setItem(ACTIVE_KEY, document.id)
     void navigate({
       to: '/editor/$resumeId',
       params: { resumeId: document.id },
     })
   }
 
-  function renameResume(document: ResumeDocument) {
+  async function renameResume(document: ResumeDocument) {
     const name = window.prompt('Resume name', document.name)?.trim()
     if (!name || name === document.name) return
-    persist(
-      documents.map((item) =>
-        item.id === document.id
-          ? { ...item, name, updatedAt: new Date().toISOString() }
-          : item,
-      ),
-    )
-  }
-
-  function duplicateResume(document: ResumeDocument) {
-    const now = new Date().toISOString()
-    const duplicate = {
-      ...document,
-      id: crypto.randomUUID(),
-      name: `${document.name} Copy`,
-      createdAt: now,
-      updatedAt: now,
+    try {
+      const updated = {
+        ...document,
+        name,
+        updatedAt: new Date().toISOString(),
+      }
+      await resumeRepository.update(updated)
+      setDocuments((current) =>
+        sortByModifiedTime(
+          current.map((item) => (item.id === document.id ? updated : item)),
+        ),
+      )
+    } catch {
+      setError('The resume could not be renamed.')
     }
-    persist([...documents, duplicate])
   }
 
-  function deleteResume(document: ResumeDocument) {
+  async function duplicateResume(document: ResumeDocument) {
+    try {
+      const duplicate = await resumeRepository.duplicate(document)
+      setDocuments((current) => sortByModifiedTime([...current, duplicate]))
+    } catch {
+      setError('The resume could not be duplicated.')
+    }
+  }
+
+  async function deleteResume(document: ResumeDocument) {
     if (!window.confirm(`Delete “${document.name}”?`)) return
-    const remaining = documents.filter((item) => item.id !== document.id)
-    persist(remaining)
-    if (window.localStorage.getItem(ACTIVE_KEY) === document.id)
-      window.localStorage.removeItem(ACTIVE_KEY)
+    try {
+      await resumeRepository.delete(document.id)
+      setDocuments((current) =>
+        current.filter((item) => item.id !== document.id),
+      )
+    } catch {
+      setError('The resume could not be deleted.')
+    }
   }
 
   return (
@@ -105,7 +110,10 @@ function Dashboard() {
             <p className="brand-caption">Your work, in your words.</p>
           </div>
         </div>
-        <button className="button button-primary" onClick={createResume}>
+        <button
+          className="button button-primary"
+          onClick={() => void createResume()}
+        >
           + Create resume
         </button>
       </header>
@@ -123,7 +131,10 @@ function Dashboard() {
           <div className="dashboard-empty island-shell">
             <h2>No resumes yet</h2>
             <p>Create a blank resume to get started.</p>
-            <button className="button button-primary" onClick={createResume}>
+            <button
+              className="button button-primary"
+              onClick={() => void createResume()}
+            >
               Create your first resume
             </button>
           </div>
@@ -148,19 +159,19 @@ function Dashboard() {
                   </button>
                   <button
                     className="button button-secondary"
-                    onClick={() => renameResume(document)}
+                    onClick={() => void renameResume(document)}
                   >
                     Rename
                   </button>
                   <button
                     className="button button-secondary"
-                    onClick={() => duplicateResume(document)}
+                    onClick={() => void duplicateResume(document)}
                   >
                     Duplicate
                   </button>
                   <button
                     className="delete-link"
-                    onClick={() => deleteResume(document)}
+                    onClick={() => void deleteResume(document)}
                   >
                     Delete
                   </button>

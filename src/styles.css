@@ -350,6 +350,48 @@ pre code {
   color: #9b3f4c;
 }
 
+.print-shell {
+  min-height: 100vh;
+  padding: 24px;
+  background: #edf5ef;
+}
+
+.print-controls {
+  display: flex;
+  justify-content: space-between;
+  width: min(210mm, 100%);
+  margin: 0 auto 18px;
+}
+
+.print-frame {
+  display: block;
+  width: 210mm;
+  min-height: 297mm;
+  max-width: 100%;
+  margin: 0 auto;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(23, 58, 64, 0.14);
+}
+
+@media print {
+  .print-shell {
+    padding: 0;
+    background: #fff;
+  }
+
+  .print-controls {
+    display: none;
+  }
+
+  .print-frame {
+    width: 210mm;
+    min-height: 297mm;
+    max-width: none;
+    box-shadow: none;
+  }
+}
+
 .resume-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
