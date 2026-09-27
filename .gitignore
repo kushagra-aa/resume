@@ -13,4 +13,6 @@ __unconfig*
 todos.json
 
 # TEMP
-docs/
+docs/*
+!docs/
+!docs/POC-TODO.md
