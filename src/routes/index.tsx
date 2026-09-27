@@ -1,16 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-export const Route = createFileRoute('/')({ component: Home })
+import type { ResumeDocument } from '#/models/resume'
+import { safeParseResumeDocument } from '#/schemas/resume'
 
-type ResumeDocument = {
-  id: string
-  name: string
-  html: string
-  css: string
-  createdAt: string
-  updatedAt: string
-}
+export const Route = createFileRoute('/')({ component: Home })
 
 type EditorKind = 'html' | 'css'
 
@@ -103,14 +97,7 @@ function newDocument(name = 'My Resume'): ResumeDocument {
 }
 
 function isResumeDocument(value: unknown): value is ResumeDocument {
-  if (!value || typeof value !== 'object') return false
-  const item = value as Partial<ResumeDocument>
-  return (
-    typeof item.id === 'string' &&
-    typeof item.name === 'string' &&
-    typeof item.html === 'string' &&
-    typeof item.css === 'string'
-  )
+  return safeParseResumeDocument(value).success
 }
 
 function migrateBuiltInTemplate(item: ResumeDocument): ResumeDocument {

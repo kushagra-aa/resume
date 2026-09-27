@@ -14,5 +14,3 @@ todos.json
 
 # TEMP
 docs/*
-!docs/
-!docs/POC-TODO.md
