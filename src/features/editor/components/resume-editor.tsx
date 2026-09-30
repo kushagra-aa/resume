@@ -56,26 +56,98 @@ function validateSource(source: string, kind: EditorKind): string[] {
   return errors
 }
 
+function formatSource(source: string, kind: EditorKind) {
+  if (kind === 'css') {
+    return source
+      .replace(/\s*\{\s*/g, ' {\n  ')
+      .replace(/;\s*/g, ';\n  ')
+      .replace(/\s*\}\s*/g, '\n}\n')
+      .replace(/\n  \n/g, '\n')
+      .trim()
+  }
+
+  let depth = 0
+  return source
+    .replace(/>\s*</g, '>\n<')
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+      if (!trimmed) return ''
+      if (/^<\//.test(trimmed)) depth = Math.max(0, depth - 1)
+      const formatted = `${'  '.repeat(depth)}${trimmed}`
+      if (
+        /^<[^!/][^>]*>$/.test(trimmed) &&
+        !/<\/[^>]+>$/.test(trimmed) &&
+        !/\/>$/.test(trimmed)
+      )
+        depth += 1
+      return formatted
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+
 function CodeEditor({
   kind,
   value,
   onChange,
+  onFormat,
 }: {
   kind: EditorKind
   value: string
   onChange: (value: string) => void
+  onFormat: () => void
 }) {
   const highlightRef = useRef<HTMLPreElement>(null)
+  const lineNumberRef = useRef<HTMLPreElement>(null)
+  const [query, setQuery] = useState('')
+  const [replacement, setReplacement] = useState('')
   const errors = useMemo(() => validateSource(value, kind), [kind, value])
   function syncScroll(event: React.UIEvent<HTMLTextAreaElement>) {
     if (highlightRef.current) {
       highlightRef.current.scrollTop = event.currentTarget.scrollTop
       highlightRef.current.scrollLeft = event.currentTarget.scrollLeft
     }
+    if (lineNumberRef.current)
+      lineNumberRef.current.scrollTop = event.currentTarget.scrollTop
+  }
+  function replaceAll() {
+    if (!query) return
+    onChange(value.split(query).join(replacement))
   }
   return (
     <>
+      <div className="editor-tools" aria-label={`${kind} editor tools`}>
+        <label>
+          Find
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search source"
+          />
+        </label>
+        <label>
+          Replace
+          <input
+            value={replacement}
+            onChange={(event) => setReplacement(event.target.value)}
+            placeholder="Replace with"
+          />
+        </label>
+        <button className="editor-tool-button" onClick={replaceAll}>
+          Replace all
+        </button>
+        <button className="editor-tool-button" onClick={onFormat}>
+          Format
+        </button>
+      </div>
       <div className="code-editor">
+        <pre ref={lineNumberRef} className="line-numbers" aria-hidden="true">
+          {Array.from(
+            { length: value.split('\n').length },
+            (_, index) => index + 1,
+          ).join('\n')}
+        </pre>
         <pre
           ref={highlightRef}
           className="code-highlight"
@@ -86,6 +158,8 @@ function CodeEditor({
         />
         <textarea
           className="source-editor"
+          id={`${kind}-source-editor`}
+          aria-label={`${kind.toUpperCase()} source`}
           spellCheck={false}
           value={value}
           onScroll={syncScroll}
@@ -115,6 +189,7 @@ export function ResumeEditor() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
+  const [saveError, setSaveError] = useState(false)
   const previewRef = useRef<HTMLIFrameElement>(null)
   const previewStageRef = useRef<HTMLDivElement>(null)
   const resume = documents.find((item) => item.id === resumeId)
@@ -157,8 +232,9 @@ export function ResumeEditor() {
           )
           setSavedAt(new Date())
           setDirty(false)
+          setSaveError(false)
         })
-        .catch(() => setError('Your changes could not be saved.'))
+        .catch(() => setSaveError(true))
     }, 500)
 
     return () => window.clearTimeout(timeout)
@@ -208,6 +284,14 @@ export function ResumeEditor() {
       ),
     )
     setDirty(true)
+    setSaveError(false)
+  }
+
+  function formatActiveSource() {
+    update(
+      activeEditor,
+      formatSource(resume?.[activeEditor] ?? '', activeEditor),
+    )
   }
 
   async function createResume() {
@@ -287,9 +371,13 @@ export function ResumeEditor() {
         <div className="header-actions">
           <span className="save-status">
             <span className="status-dot" />
-            {savedAt
-              ? `Saved ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-              : 'Ready'}
+            {saveError
+              ? 'Save failed'
+              : dirty
+                ? 'Unsaved changes'
+                : savedAt
+                  ? `Saved ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                  : 'Ready'}
           </span>
           <button className="button button-quiet" onClick={resetResume}>
             Reset
@@ -371,13 +459,17 @@ export function ResumeEditor() {
             </button>
           </div>
           <div className="editor-wrap">
-            <label htmlFor="source-editor" className="sr-only">
+            <label
+              htmlFor={`${activeEditor}-source-editor`}
+              className="sr-only"
+            >
               {activeEditor.toUpperCase()} source
             </label>
             <CodeEditor
               kind={activeEditor}
               value={resume[activeEditor]}
               onChange={(value) => update(activeEditor, value)}
+              onFormat={formatActiveSource}
             />
           </div>
           <div className="editor-footer">

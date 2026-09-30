@@ -636,6 +636,38 @@ pre code {
   min-height: 0;
   padding: 16px;
 }
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.editor-tools label {
+  display: grid;
+  gap: 4px;
+  color: var(--sea-ink-soft);
+  font-size: 10px;
+  font-weight: 700;
+}
+.editor-tools input {
+  width: 116px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 7px;
+  color: var(--sea-ink);
+  background: var(--surface-strong);
+  font: 11px var(--font-sans);
+}
+.editor-tool-button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 8px;
+  color: var(--sea-ink);
+  background: var(--surface-strong);
+  cursor: pointer;
+  font: 700 10px var(--font-sans);
+}
 .code-editor {
   position: relative;
   height: calc(100% - 25px);
@@ -645,6 +677,25 @@ pre code {
   border-radius: 10px;
   background: #173238;
   box-shadow: 0 2px 0 rgba(255, 255, 255, 0.15) inset;
+}
+.line-numbers {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 43px;
+  overflow: hidden;
+  margin: 0;
+  border-right: 1px solid rgba(215, 236, 232, 0.14);
+  padding: 16px 8px 16px 0;
+  color: rgba(215, 236, 232, 0.42);
+  font:
+    12px/1.65 'SFMono-Regular',
+    Consolas,
+    monospace;
+  text-align: right;
+  user-select: none;
 }
 .code-highlight,
 .code-editor .source-editor {
@@ -661,6 +712,7 @@ pre code {
   tab-size: 2;
   white-space: pre-wrap;
   word-break: break-word;
+  left: 43px;
 }
 .code-highlight {
   pointer-events: none;
