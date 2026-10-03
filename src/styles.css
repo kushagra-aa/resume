@@ -298,6 +298,13 @@ pre code {
   margin-bottom: 76px;
 }
 
+.dashboard-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .dashboard-content {
   max-width: 1040px;
   margin: 0 auto;
@@ -882,6 +889,11 @@ pre code {
   background: var(--surface-strong);
   cursor: pointer;
   font: 700 14px/1 var(--font-sans);
+}
+.zoom-button.zoom-label {
+  width: auto;
+  padding: 0 7px;
+  font-size: 9px;
 }
 .zoom-value {
   min-width: 35px;

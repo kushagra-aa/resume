@@ -27,8 +27,22 @@ function PrintRoute() {
       .catch(() => setError('The resume could not be loaded for printing.'))
   }, [resumeId])
 
+  useEffect(() => {
+    if (
+      !resume ||
+      window.sessionStorage.getItem('resume:print-on-load') !== resume.id
+    )
+      return
+    window.sessionStorage.removeItem('resume:print-on-load')
+    const timeout = window.setTimeout(() => window.print(), 150)
+    return () => window.clearTimeout(timeout)
+  }, [resume])
+
   function print() {
-    frameRef.current?.contentWindow?.print()
+    // Print the dedicated route itself. Its print CSS removes the controls,
+    // leaving only the isolated resume iframe in the browser print output.
+    window.focus()
+    window.print()
   }
 
   if (error || !resume)
@@ -69,7 +83,8 @@ function PrintRoute() {
         className="print-frame"
         title={`${resume.name} print preview`}
         sandbox="allow-scripts allow-modals"
-        srcDoc={createResumeSrcDoc(resume)}
+        onLoad={() => frameRef.current?.contentWindow?.focus()}
+        srcDoc={createResumeSrcDoc(resume, false, 'print')}
       />
     </main>
   )

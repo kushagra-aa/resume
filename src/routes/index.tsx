@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { createStarterDocument } from '#/features/editor/starter-content'
@@ -7,6 +7,7 @@ import { loadResumes } from '#/features/resume/services/resume-storage'
 import { renderTemplate } from '#/features/templates/template-renderer'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
+import { importResumePackage } from '#/features/resume/source-package'
 import type { ResumeDocument } from '#/models/resume'
 
 export const Route = createFileRoute('/')({ component: Dashboard })
@@ -35,6 +36,7 @@ function Dashboard() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [templates, setTemplates] = useState<ResumeTemplate[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadResumes()
@@ -87,6 +89,24 @@ function Dashboard() {
       })
     } catch {
       setError('The resume could not be created from that template.')
+    }
+  }
+
+  async function importPackage(file: File) {
+    try {
+      const imported = await importResumePackage(file)
+      await resumeRepository.create(imported)
+      setDocuments((current) => sortByModifiedTime([...current, imported]))
+      void navigate({
+        to: '/editor/$resumeId',
+        params: { resumeId: imported.id },
+      })
+    } catch (importError) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : 'The source package could not be imported.',
+      )
     }
   }
 
@@ -148,9 +168,29 @@ function Dashboard() {
             <p className="brand-caption">Your work, in your words.</p>
           </div>
         </div>
-        <button className="button button-primary" onClick={openCreateDialog}>
-          + Create resume
-        </button>
+        <div className="dashboard-header-actions">
+          <input
+            ref={importInputRef}
+            className="sr-only"
+            type="file"
+            accept=".zip,application/zip"
+            aria-label="Import source package"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+              if (file) void importPackage(file)
+            }}
+          />
+          <button
+            className="button button-secondary"
+            onClick={() => importInputRef.current?.click()}
+          >
+            Import ZIP
+          </button>
+          <button className="button button-primary" onClick={openCreateDialog}>
+            + Create resume
+          </button>
+        </div>
       </header>
 
       <section className="dashboard-content" aria-labelledby="dashboard-title">

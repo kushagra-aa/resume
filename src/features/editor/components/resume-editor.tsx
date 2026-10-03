@@ -6,6 +6,7 @@ import { resumeRepository } from '#/db/repositories/resume-repository'
 import { createStarterDocument } from '#/features/editor/starter-content'
 import { loadResumes } from '#/features/resume/services/resume-storage'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
+import { exportResumePackage } from '#/features/resume/source-package'
 import type { ResumeDocument } from '#/models/resume'
 
 type EditorKind = 'html' | 'css'
@@ -326,14 +327,26 @@ export function ResumeEditor() {
     const link = window.document.createElement('a')
     link.href = url
     link.download =
-      resume.name.toLowerCase().replace(/\\s+/g, '-') + '.' + extension
+      resume.name.toLowerCase().replace(/\s+/g, '-') + '.' + extension
     link.click()
     URL.revokeObjectURL(url)
   }
 
   function printResume() {
-    if (resume)
+    if (resume) {
+      window.sessionStorage.setItem('resume:print-on-load', resume.id)
       void navigate({ to: '/print/$resumeId', params: { resumeId: resume.id } })
+    }
+  }
+
+  function fitPreview(mode: 'width' | 'page') {
+    const stage = previewStageRef.current
+    if (!stage) return
+    const widthFit = stage.clientWidth / 794
+    const pageFit = Math.min(widthFit, stage.clientHeight / 1123)
+    setZoom(
+      Math.max(0.35, Math.min(1.2, mode === 'width' ? widthFit : pageFit)),
+    )
   }
 
   if (loading)
@@ -387,6 +400,12 @@ export function ResumeEditor() {
             onClick={() => exportSource('html')}
           >
             Export HTML
+          </button>
+          <button
+            className="button button-secondary"
+            onClick={() => exportResumePackage(resume)}
+          >
+            Export ZIP
           </button>
           <button className="button button-primary" onClick={printResume}>
             Print / PDF
@@ -491,6 +510,18 @@ export function ResumeEditor() {
               <span className="page-label">
                 A4 · {pageCount} {pageCount === 1 ? 'page' : 'pages'}
               </span>
+              <button
+                className="zoom-button zoom-label"
+                onClick={() => fitPreview('width')}
+              >
+                Fit width
+              </button>
+              <button
+                className="zoom-button zoom-label"
+                onClick={() => fitPreview('page')}
+              >
+                Fit page
+              </button>
               <button
                 className="zoom-button"
                 onClick={() => setZoom((value) => Math.max(0.5, value - 0.1))}
