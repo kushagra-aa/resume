@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { createStarterDocument } from '#/features/editor/starter-content'
 import { loadResumes } from '#/features/resume/services/resume-storage'
+import { renderTemplate } from '#/features/templates/template-renderer'
+import { loadTemplates } from '#/features/templates/template-service'
+import type { ResumeTemplate } from '#/features/templates/template-types'
 import type { ResumeDocument } from '#/models/resume'
 
 export const Route = createFileRoute('/')({ component: Dashboard })
@@ -29,6 +32,9 @@ function Dashboard() {
   const [documents, setDocuments] = useState<ResumeDocument[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [templates, setTemplates] = useState<ResumeTemplate[]>([])
+  const [templatesLoading, setTemplatesLoading] = useState(false)
 
   useEffect(() => {
     loadResumes()
@@ -39,7 +45,20 @@ function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function createResume() {
+  async function openCreateDialog() {
+    setShowCreateDialog(true)
+    if (templates.length || templatesLoading) return
+    setTemplatesLoading(true)
+    try {
+      setTemplates(await loadTemplates())
+    } catch {
+      setError('Templates could not be loaded.')
+    } finally {
+      setTemplatesLoading(false)
+    }
+  }
+
+  async function createBlankResume() {
     try {
       const created = createStarterDocument('Resume ' + (documents.length + 1))
       await resumeRepository.create(created)
@@ -49,6 +68,25 @@ function Dashboard() {
       })
     } catch {
       setError('The new resume could not be created.')
+    }
+  }
+
+  async function createFromTemplate(template: ResumeTemplate) {
+    try {
+      const created = createStarterDocument(template.name)
+      const generated = {
+        ...created,
+        html: renderTemplate(template.html, template.defaults),
+        css: template.css,
+      }
+      await resumeRepository.create(generated)
+      setShowCreateDialog(false)
+      void navigate({
+        to: '/editor/$resumeId',
+        params: { resumeId: generated.id },
+      })
+    } catch {
+      setError('The resume could not be created from that template.')
     }
   }
 
@@ -110,10 +148,7 @@ function Dashboard() {
             <p className="brand-caption">Your work, in your words.</p>
           </div>
         </div>
-        <button
-          className="button button-primary"
-          onClick={() => void createResume()}
-        >
+        <button className="button button-primary" onClick={openCreateDialog}>
           + Create resume
         </button>
       </header>
@@ -133,7 +168,7 @@ function Dashboard() {
             <p>Create a blank resume to get started.</p>
             <button
               className="button button-primary"
-              onClick={() => void createResume()}
+              onClick={openCreateDialog}
             >
               Create your first resume
             </button>
@@ -181,6 +216,52 @@ function Dashboard() {
           </div>
         ) : null}
       </section>
+
+      {showCreateDialog ? (
+        <div className="dialog-backdrop" role="presentation">
+          <section
+            className="template-dialog island-shell"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="template-dialog-title"
+          >
+            <div className="template-dialog-header">
+              <div>
+                <p className="panel-kicker">New resume</p>
+                <h2 id="template-dialog-title">Choose a starting point</h2>
+              </div>
+              <button
+                className="button button-quiet"
+                aria-label="Close template chooser"
+                onClick={() => setShowCreateDialog(false)}
+              >
+                Close
+              </button>
+            </div>
+            <button
+              className="template-option"
+              onClick={() => void createBlankResume()}
+            >
+              <strong>Blank starter</strong>
+              <span>Start with the current editable starter resume.</span>
+            </button>
+            {templatesLoading ? (
+              <p className="dashboard-message">Loading templates…</p>
+            ) : (
+              templates.map((template) => (
+                <button
+                  className="template-option"
+                  key={template.id}
+                  onClick={() => void createFromTemplate(template)}
+                >
+                  <strong>{template.name}</strong>
+                  <span>{template.description}</span>
+                </button>
+              ))
+            )}
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }

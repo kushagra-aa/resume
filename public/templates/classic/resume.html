@@ -1,0 +1,45 @@
+<main class="resume">
+  <header class="header">
+    <h1>{{name}}</h1>
+    <p class="title">{{title}}</p>
+    <p class="contact">{{email}} · {{website}}</p>
+    <p class="summary">{{summary}}</p>
+  </header>
+  <section>
+    <h2>Experience</h2>
+    {{#experience}}
+    <article>
+      <div class="row">
+        <h3>{{role}} · {{company}}</h3>
+        <span>{{dates}}</span>
+      </div>
+      <p class="muted">{{location}}</p>
+      <ul>
+        {{#bullets}}
+        <li>{{value}}</li>
+        {{/bullets}}
+      </ul>
+    </article>
+    {{/experience}}
+  </section>
+  <section>
+    <h2>Projects</h2>
+    {{#projects}}
+    <article>
+      <div class="row">
+        <h3>{{name}}</h3>
+        <span>{{dates}}</span>
+      </div>
+      <p>{{description}}</p>
+    </article>
+    {{/projects}}
+  </section>
+  <section>
+    <h2>Skills</h2>
+    <p>{{#skills}}<span class="skill">{{value}}</span> {{/skills}}</p>
+  </section>
+  <section>
+    <h2>Education</h2>
+    <p>{{education}}</p>
+  </section>
+</main>

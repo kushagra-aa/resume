@@ -1,0 +1,101 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+:root {
+  color: #202124;
+  font-family: Georgia, serif;
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fff;
+}
+.resume {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 18mm;
+  margin: 0 auto;
+}
+.header {
+  padding-bottom: 7mm;
+  border-bottom: 1px solid #9a9a9a;
+}
+h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.title {
+  margin: 2mm 0;
+  font-size: 17px;
+  color: #5f6368;
+}
+.contact,
+.muted {
+  color: #6b6b6b;
+  font-size: 10.5pt;
+}
+.summary {
+  max-width: 165mm;
+  margin: 6mm 0 0;
+  font-size: 10.5pt;
+  line-height: 1.45;
+}
+section {
+  margin-top: 8mm;
+}
+h2 {
+  margin: 0 0 4mm;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+article {
+  margin: 0 0 5mm;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8mm;
+}
+h3 {
+  margin: 0;
+  font-size: 13px;
+}
+p {
+  line-height: 1.42;
+}
+article p {
+  margin: 1.5mm 0 0;
+  font-size: 10.5pt;
+}
+ul {
+  margin: 2mm 0 0;
+  padding-left: 5mm;
+}
+li {
+  margin: 1mm 0;
+  font-size: 10.5pt;
+  line-height: 1.35;
+}
+.skill {
+  display: inline-block;
+  margin: 0 2mm 2mm 0;
+  padding: 1.5mm 2mm;
+  border: 1px solid #aaa;
+  font-size: 10pt;
+}
+@media print {
+  .header,
+  article,
+  section {
+    break-inside: avoid;
+  }
+}

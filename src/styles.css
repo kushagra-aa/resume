@@ -350,6 +350,70 @@ pre code {
   color: #9b3f4c;
 }
 
+.dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(23, 58, 64, 0.28);
+  backdrop-filter: blur(5px);
+}
+
+.template-dialog {
+  display: grid;
+  width: min(560px, 100%);
+  gap: 10px;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.template-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.template-dialog-header h2 {
+  margin: 6px 0 0;
+  color: var(--sea-ink);
+  font:
+    700 28px/1.05 'Fraunces',
+    Georgia,
+    serif;
+}
+
+.template-option {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px 16px;
+  color: var(--sea-ink);
+  text-align: left;
+  background: var(--surface-strong);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.template-option:hover,
+.template-option:focus-visible {
+  border-color: var(--lagoon-deep);
+  background: var(--link-bg-hover);
+  transform: translateY(-1px);
+}
+
+.template-option span {
+  color: var(--sea-ink-soft);
+  font-size: 12px;
+}
+
 .print-shell {
   min-height: 100vh;
   padding: 24px;

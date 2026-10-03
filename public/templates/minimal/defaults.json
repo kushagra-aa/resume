@@ -1,0 +1,28 @@
+{
+  "name": "Kushagra Agnihotri",
+  "title": "Full-stack Developer",
+  "summary": "Full-stack developer building production web applications with React, Node.js, TypeScript, and PostgreSQL.",
+  "email": "hello@example.com",
+  "website": "example.com",
+  "experience": [
+    {
+      "role": "Software Engineer",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "Remote",
+      "bullets": [
+        "Built and shipped reliable product features.",
+        "Collaborated with product and engineering teams."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "dates": "2024",
+      "description": "A useful project description with measurable outcomes."
+    }
+  ],
+  "skills": ["TypeScript", "React", "Node.js", "PostgreSQL", "Cloudflare"],
+  "education": "Degree · University Name · 2022"
+}

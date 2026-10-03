@@ -1,0 +1,98 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+:root {
+  color: #262626;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fff;
+}
+.resume {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 22mm 24mm;
+  margin: 0 auto;
+}
+header {
+  padding-bottom: 8mm;
+  border-bottom: 1px solid #222;
+}
+h1 {
+  margin: 0;
+  font-size: 35px;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+.title {
+  margin: 2mm 0 0;
+  font-size: 15px;
+}
+.contact,
+.muted {
+  color: #727272;
+  font-size: 9.5pt;
+}
+.summary {
+  max-width: 145mm;
+  margin: 9mm 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+}
+section {
+  margin-top: 10mm;
+}
+h2 {
+  margin: 0 0 4mm;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+article {
+  margin-bottom: 6mm;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8mm;
+}
+h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+.row span {
+  color: #727272;
+  font-size: 9.5pt;
+}
+p,
+li {
+  font-size: 10.5pt;
+  line-height: 1.45;
+}
+article p {
+  margin: 1mm 0 0;
+}
+ul {
+  margin: 2mm 0 0;
+  padding-left: 5mm;
+}
+li {
+  margin: 1mm 0;
+}
+@media print {
+  header,
+  article,
+  section {
+    break-inside: avoid;
+  }
+}

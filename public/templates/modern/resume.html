@@ -1,0 +1,60 @@
+<main class="resume">
+  <header>
+    <div>
+      <p class="eyebrow">PORTFOLIO / RESUME</p>
+      <h1>{{name}}</h1>
+      <p class="title">{{title}}</p>
+    </div>
+    <div class="contact">{{email}}<br />{{website}}</div>
+  </header>
+  <div class="grid">
+    <aside>
+      <section>
+        <h2>Profile</h2>
+        <p>{{summary}}</p>
+      </section>
+      <section>
+        <h2>Skills</h2>
+        <div class="skills">{{#skills}}<span>{{value}}</span>{{/skills}}</div>
+      </section>
+      <section>
+        <h2>Education</h2>
+        <p>{{education}}</p>
+      </section>
+    </aside>
+    <div>
+      <section>
+        <h2>Experience</h2>
+        {{#experience}}
+        <article>
+          <div class="marker"></div>
+          <div>
+            <div class="row">
+              <h3>{{role}}</h3>
+              <span>{{dates}}</span>
+            </div>
+            <p class="company">{{company}} · {{location}}</p>
+            <ul>
+              {{#bullets}}
+              <li>{{value}}</li>
+              {{/bullets}}
+            </ul>
+          </div>
+        </article>
+        {{/experience}}
+      </section>
+      <section>
+        <h2>Selected projects</h2>
+        {{#projects}}
+        <article class="project">
+          <div class="row">
+            <h3>{{name}}</h3>
+            <span>{{dates}}</span>
+          </div>
+          <p>{{description}}</p>
+        </article>
+        {{/projects}}
+      </section>
+    </div>
+  </div>
+</main>
