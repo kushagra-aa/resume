@@ -31,4 +31,10 @@ describe('resume source packages', () => {
       name: document.name,
     })
   })
+
+  it('rejects malformed ZIP input', () => {
+    expect(() => readResumePackage(new Uint8Array([1, 2, 3]))).toThrow(
+      'valid ZIP file',
+    )
+  })
 })

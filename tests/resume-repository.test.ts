@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { resumeDatabase } from '#/db/client'
 import { resumeRepository } from '#/db/repositories/resume-repository'
@@ -51,5 +51,16 @@ describe('resume repository', () => {
 
     expect(await resumeRepository.get('malformed')).toBeNull()
     expect(await resumeRepository.list()).toEqual([])
+  })
+
+  it('reports unavailable IndexedDB without hiding the cause', async () => {
+    const indexedDb = globalThis.indexedDB
+    vi.stubGlobal('indexedDB', undefined)
+
+    await expect(resumeRepository.list()).rejects.toThrow(
+      'storage is unavailable',
+    )
+
+    vi.stubGlobal('indexedDB', indexedDb)
   })
 })
