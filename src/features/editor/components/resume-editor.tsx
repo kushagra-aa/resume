@@ -1,15 +1,32 @@
 import { useNavigate, useParams } from '@tanstack/react-router'
+import {
+  ChevronDown,
+  CornerDownLeftIcon,
+  Download,
+  Printer,
+  RotateCcw,
+  Search,
+  TriangleAlert,
+  WandSparkles,
+} from 'lucide-react'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { BackButton } from '#/components/back-button'
+import { AppDialog } from '#/components/app-dialog'
+import { AppHeader } from '#/components/app-header'
+import { ThemeToggle } from '#/components/theme-toggle'
 import { resumeRepository } from '#/db/repositories/resume-repository'
-import { createStarterDocument } from '#/features/editor/starter-content'
-import { loadResumes } from '#/features/resume/services/resume-storage'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
+import { loadResumes } from '#/features/resume/services/resume-storage'
 import { exportResumePackage } from '#/features/resume/source-package'
+import { createStarterDocument } from '#/features/templates/starter-template'
 import type { ResumeDocument } from '#/models/resume'
 
 type EditorKind = 'html' | 'css'
+
+const MIN_PREVIEW_ZOOM = 0.35
+const MAX_PREVIEW_ZOOM = 1.5
 
 function escapeHtml(value: string) {
   return value
@@ -103,6 +120,7 @@ function CodeEditor({
   const lineNumberRef = useRef<HTMLPreElement>(null)
   const [query, setQuery] = useState('')
   const [replacement, setReplacement] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
   const errors = useMemo(() => validateSource(value, kind), [kind, value])
   function syncScroll(event: React.UIEvent<HTMLTextAreaElement>) {
     if (highlightRef.current) {
@@ -116,32 +134,60 @@ function CodeEditor({
     if (!query) return
     onChange(value.split(query).join(replacement))
   }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== 'Tab') return
+    event.preventDefault()
+    const textarea = event.currentTarget
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const nextValue = `${value.slice(0, start)}  ${value.slice(end)}`
+    onChange(nextValue)
+    window.requestAnimationFrame(() => {
+      textarea.selectionStart = start + 2
+      textarea.selectionEnd = start + 2
+    })
+  }
+
   return (
     <>
-      <div className="editor-tools" aria-label={`${kind} editor tools`}>
-        <label>
-          Find
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search source"
-          />
-        </label>
-        <label>
-          Replace
-          <input
-            value={replacement}
-            onChange={(event) => setReplacement(event.target.value)}
-            placeholder="Replace with"
-          />
-        </label>
-        <button className="editor-tool-button" onClick={replaceAll}>
-          Replace all
-        </button>
+      <div className="editor-tools-header" aria-label={`${kind} editor tools`}>
         <button className="editor-tool-button" onClick={onFormat}>
+          <WandSparkles size={14} aria-hidden="true" />
           Format
         </button>
+        <button
+          className="editor-tool-button"
+          aria-expanded={showSearch}
+          onClick={() => setShowSearch((visible) => !visible)}
+        >
+          <Search size={14} aria-hidden="true" />
+          {showSearch ? 'Hide find & replace' : 'Find & replace'}
+        </button>
       </div>
+      {showSearch ? (
+        <div className="editor-tools">
+          <label>
+            Find
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search source"
+            />
+          </label>
+          <label>
+            Replace
+            <input
+              value={replacement}
+              onChange={(event) => setReplacement(event.target.value)}
+              placeholder="Replace with"
+            />
+          </label>
+          <button className="editor-tool-button" onClick={replaceAll}>
+            Replace all <CornerDownLeftIcon size={10} aria-hidden />
+          </button>
+        </div>
+      ) : null}
       <div className="code-editor">
         <pre ref={lineNumberRef} className="line-numbers" aria-hidden="true">
           {Array.from(
@@ -162,8 +208,12 @@ function CodeEditor({
           id={`${kind}-source-editor`}
           aria-label={`${kind.toUpperCase()} source`}
           spellCheck={false}
+          autoCapitalize="off"
+          autoCorrect="off"
+          wrap="off"
           value={value}
           onScroll={syncScroll}
+          onKeyDown={handleKeyDown}
           onChange={(event) => onChange(event.target.value)}
         />
       </div>
@@ -186,16 +236,21 @@ export function ResumeEditor() {
   const [activeEditor, setActiveEditor] = useState<EditorKind>('html')
   const [zoom, setZoom] = useState(0.8)
   const [previewHeight, setPreviewHeight] = useState(1123)
-  const [stageWidth, setStageWidth] = useState(720)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [saveError, setSaveError] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [showResetDialog, setShowResetDialog] = useState(false)
   const previewRef = useRef<HTMLIFrameElement>(null)
   const previewStageRef = useRef<HTMLDivElement>(null)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
   const resume = documents.find((item) => item.id === resumeId)
   const pageCount = Math.max(1, Math.ceil(previewHeight / 1123))
-  const fittedZoom = Math.min(zoom, Math.max(0.35, stageWidth / 794))
+  const renderedZoom = Math.max(
+    MIN_PREVIEW_ZOOM,
+    Math.min(MAX_PREVIEW_ZOOM, zoom),
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -242,16 +297,6 @@ export function ResumeEditor() {
   }, [dirty, resume])
 
   useEffect(() => {
-    const stage = previewStageRef.current
-    if (!stage) return
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setStageWidth(entry.contentRect.width)
-    })
-    observer.observe(stage)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
     const onPreviewMessage = (event: MessageEvent<unknown>) => {
       if (event.source !== previewRef.current?.contentWindow) return
       if (!event.data || typeof event.data !== 'object') return
@@ -267,6 +312,26 @@ export function ResumeEditor() {
     window.addEventListener('message', onPreviewMessage)
     return () => window.removeEventListener('message', onPreviewMessage)
   }, [])
+
+  useEffect(() => {
+    if (!showExportMenu) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowExportMenu(false)
+    }
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof Node &&
+        !exportMenuRef.current?.contains(event.target)
+      )
+        setShowExportMenu(false)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    document.addEventListener('click', closeOnOutsideClick)
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape)
+      document.removeEventListener('click', closeOnOutsideClick)
+    }
+  }, [showExportMenu])
 
   useEffect(
     () => setPreviewHeight(1123),
@@ -295,28 +360,31 @@ export function ResumeEditor() {
     )
   }
 
-  async function createResume() {
-    const created = createStarterDocument('Resume ' + (documents.length + 1))
-    await resumeRepository.create(created)
-    void navigate({ to: '/editor/$resumeId', params: { resumeId: created.id } })
-  }
-
   async function deleteResume() {
     if (!resume || !window.confirm('Delete “' + resume.name + '”?')) return
     await resumeRepository.delete(resume.id)
     void navigate({ to: '/' })
   }
 
-  async function resetResume() {
-    if (!resume || !window.confirm('Reset this resume to the starter content?'))
-      return
-    const reset = { ...createStarterDocument(resume.name), id: resume.id }
-    await resumeRepository.update(reset)
-    setDocuments((current) =>
-      current.map((item) => (item.id === reset.id ? reset : item)),
-    )
-    setSavedAt(new Date())
-    setDirty(false)
+  function resetResume() {
+    if (resume) setShowResetDialog(true)
+  }
+
+  async function confirmResetResume() {
+    if (!resume) return
+    try {
+      const reset = { ...createStarterDocument(resume.name), id: resume.id }
+      await resumeRepository.update(reset)
+      setDocuments((current) =>
+        current.map((item) => (item.id === reset.id ? reset : item)),
+      )
+      setSavedAt(new Date())
+      setDirty(false)
+      setSaveError(false)
+      setShowResetDialog(false)
+    } catch {
+      setError('The resume could not be reset.')
+    }
   }
 
   function exportSource(extension: 'html' | 'css') {
@@ -345,7 +413,10 @@ export function ResumeEditor() {
     const widthFit = stage.clientWidth / 794
     const pageFit = Math.min(widthFit, stage.clientHeight / 1123)
     setZoom(
-      Math.max(0.35, Math.min(1.2, mode === 'width' ? widthFit : pageFit)),
+      Math.max(
+        MIN_PREVIEW_ZOOM,
+        Math.min(MAX_PREVIEW_ZOOM, mode === 'width' ? widthFit : pageFit),
+      ),
     )
   }
 
@@ -373,45 +444,96 @@ export function ResumeEditor() {
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <div className="brand-lockup">
-          <span className="brand-mark">R</span>
-          <div>
-            <p className="brand-name">ResuMe</p>
-            <p className="brand-caption">Your work, in your words.</p>
-          </div>
-        </div>
-        <div className="header-actions">
-          <span className="save-status">
-            <span className="status-dot" />
-            {saveError
-              ? 'Save failed'
-              : dirty
-                ? 'Unsaved changes'
-                : savedAt
-                  ? `Saved ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                  : 'Ready'}
-          </span>
-          <button className="button button-quiet" onClick={resetResume}>
-            Reset
-          </button>
+      <AppHeader
+        leading={
+          <BackButton
+            label="Dashboard"
+            onClick={() => void navigate({ to: '/' })}
+          />
+        }
+      >
+        <span className="save-status">
+          <span className="status-dot" />
+          {saveError
+            ? 'Save failed'
+            : dirty
+              ? 'Unsaved changes'
+              : savedAt
+                ? `Saved ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                : 'Ready'}
+        </span>
+        <ThemeToggle />
+        <button className="button button-quiet" onClick={resetResume}>
+          <RotateCcw size={14} aria-hidden="true" />
+          Reset
+        </button>
+        <div
+          className="export-menu"
+          ref={exportMenuRef}
+          onClick={(event) => event.stopPropagation()}
+        >
           <button
-            className="button button-secondary"
-            onClick={() => exportSource('html')}
+            className="button button-secondary export-menu-trigger"
+            aria-expanded={showExportMenu}
+            aria-haspopup="menu"
+            onClick={() => setShowExportMenu((visible) => !visible)}
           >
-            Export HTML
+            <Download size={14} aria-hidden="true" />
+            Export
+            <ChevronDown size={14} aria-hidden="true" />
           </button>
-          <button
-            className="button button-secondary"
-            onClick={() => exportResumePackage(resume)}
-          >
-            Export ZIP
-          </button>
-          <button className="button button-primary" onClick={printResume}>
-            Print / PDF
-          </button>
+          {showExportMenu ? (
+            <div className="export-menu-popover" role="menu">
+              <button
+                className="export-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setShowExportMenu(false)
+                  exportSource('html')
+                }}
+              >
+                <Download size={14} aria-hidden="true" />
+                <span>
+                  <strong>HTML</strong>
+                  <small>resume.html</small>
+                </span>
+              </button>
+              <button
+                className="export-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setShowExportMenu(false)
+                  exportSource('css')
+                }}
+              >
+                <Download size={14} aria-hidden="true" />
+                <span>
+                  <strong>CSS</strong>
+                  <small>resume.css</small>
+                </span>
+              </button>
+              <button
+                className="export-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setShowExportMenu(false)
+                  exportResumePackage(resume)
+                }}
+              >
+                <Download size={14} aria-hidden="true" />
+                <span>
+                  <strong>Source ZIP</strong>
+                  <small>HTML, CSS &amp; manifest</small>
+                </span>
+              </button>
+            </div>
+          ) : null}
         </div>
-      </header>
+        <button className="button button-primary" onClick={printResume}>
+          <Printer size={14} aria-hidden="true" />
+          Print / PDF
+        </button>
+      </AppHeader>
       <section className="workspace" aria-label="Resume workspace">
         <aside className="editor-panel">
           <div className="panel-heading">
@@ -424,32 +546,6 @@ export function ResumeEditor() {
                 onChange={(event) => update('name', event.target.value)}
               />
             </div>
-            <button className="export-link" onClick={() => exportSource('css')}>
-              Export CSS
-            </button>
-          </div>
-          <div className="resume-list" aria-label="Saved resumes">
-            {documents.map((item) => (
-              <button
-                key={item.id}
-                className={
-                  item.id === resume.id
-                    ? 'resume-list-item active'
-                    : 'resume-list-item'
-                }
-                onClick={() =>
-                  void navigate({
-                    to: '/editor/$resumeId',
-                    params: { resumeId: item.id },
-                  })
-                }
-              >
-                {item.name}
-              </button>
-            ))}
-            <button className="new-resume" onClick={() => void createResume()}>
-              + New resume
-            </button>
           </div>
           <div
             className="editor-tabs"
@@ -524,7 +620,9 @@ export function ResumeEditor() {
               </button>
               <button
                 className="zoom-button"
-                onClick={() => setZoom((value) => Math.max(0.5, value - 0.1))}
+                onClick={() =>
+                  setZoom((value) => Math.max(MIN_PREVIEW_ZOOM, value - 0.1))
+                }
                 aria-label="Zoom out"
               >
                 −
@@ -532,7 +630,9 @@ export function ResumeEditor() {
               <span className="zoom-value">{Math.round(zoom * 100)}%</span>
               <button
                 className="zoom-button"
-                onClick={() => setZoom((value) => Math.min(1.2, value + 0.1))}
+                onClick={() =>
+                  setZoom((value) => Math.min(MAX_PREVIEW_ZOOM, value + 0.1))
+                }
                 aria-label="Zoom in"
               >
                 +
@@ -542,13 +642,18 @@ export function ResumeEditor() {
           <div
             className="preview-stage"
             ref={previewStageRef}
-            style={{ '--page-count': pageCount } as React.CSSProperties}
+            style={
+              {
+                '--page-count': pageCount,
+                '--preview-page-height': `${297 * renderedZoom}mm`,
+              } as React.CSSProperties
+            }
           >
             <div
               className="resume-frame-shell"
               style={{
-                width: `${210 * fittedZoom}mm`,
-                height: `${297 * pageCount * fittedZoom}mm`,
+                width: `${210 * renderedZoom}mm`,
+                height: `${297 * pageCount * renderedZoom}mm`,
               }}
             >
               <iframe
@@ -557,7 +662,7 @@ export function ResumeEditor() {
                 className="resume-frame"
                 style={{
                   height: `${297 * pageCount}mm`,
-                  transform: `scale(${fittedZoom})`,
+                  transform: `scale(${renderedZoom})`,
                 }}
                 sandbox="allow-scripts"
                 srcDoc={preview}
@@ -566,6 +671,36 @@ export function ResumeEditor() {
           </div>
         </section>
       </section>
+      <AppDialog
+        open={showResetDialog}
+        title="Reset resume?"
+        description="This replaces the current HTML and CSS with the starter content."
+        icon={<TriangleAlert size={20} aria-hidden="true" />}
+        tone="danger"
+        onClose={() => setShowResetDialog(false)}
+        actions={
+          <>
+            <button
+              className="button button-secondary"
+              onClick={() => setShowResetDialog(false)}
+            >
+              Keep editing
+            </button>
+            <button
+              className="button button-danger"
+              onClick={() => void confirmResetResume()}
+            >
+              Reset resume
+            </button>
+          </>
+        }
+      >
+        <div className="dialog-warning">
+          <strong>Your current source will be replaced.</strong>
+          <span>This cannot be undone from the editor.</span>
+        </div>
+        <p className="dialog-confirmation-name">{resume.name}</p>
+      </AppDialog>
     </main>
   )
 }

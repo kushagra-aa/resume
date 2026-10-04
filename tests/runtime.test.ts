@@ -20,7 +20,7 @@ describe('resume runtime', () => {
     expect(preview).toContain(document.css)
     expect(print).toContain(document.html)
     expect(print).toContain(document.css)
-    expect(print).toContain('@page{size:A4;margin:0}')
+    expect(print).toContain('@page{size:A4;margin:8mm}')
   })
 
   it('reports preview height only when requested', () => {

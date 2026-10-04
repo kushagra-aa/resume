@@ -1,5 +1,5 @@
 import { resumeRepository } from '#/db/repositories/resume-repository'
-import { createStarterDocument } from '#/features/editor/starter-content'
+import { createStarterDocument } from '#/features/templates/starter-template'
 import type { ResumeDocument } from '#/models/resume'
 import { safeParseResumeDocument } from '#/schemas/resume'
 

@@ -10,6 +10,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
 
+import { ThemeSync } from '#/components/theme-toggle'
 import type { QueryClient } from '@tanstack/react-query'
 
 interface MyRouterContext {
@@ -47,6 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <ThemeSync />
         {children}
         <TanStackDevtools
           config={{
