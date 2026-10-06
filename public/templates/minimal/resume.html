@@ -2,11 +2,18 @@
   <header>
     <h1>{{name}}</h1>
     <p class="title">{{title}}</p>
-    <p class="contact">{{email}} / {{website}}</p>
+    {{#sectionVisibility.personal}}
+    <p class="contact">
+      {{email}} / {{phone}} / {{location}} / {{website}} / {{linkedin}} /
+      {{github}}
+    </p>
+    {{/sectionVisibility.personal}}
   </header>
+  {{#sectionVisibility.summary}}
   <p class="summary">{{summary}}</p>
+  {{/sectionVisibility.summary}} {{#sectionVisibility.experience}}
   <section>
-    <h2>Experience</h2>
+    <h2>{{sectionTitles.experience}}</h2>
     {{#experience}}
     <article>
       <div class="row">
@@ -22,8 +29,9 @@
     </article>
     {{/experience}}
   </section>
+  {{/sectionVisibility.experience}} {{#sectionVisibility.projects}}
   <section>
-    <h2>Projects</h2>
+    <h2>{{sectionTitles.projects}}</h2>
     {{#projects}}
     <article>
       <div class="row">
@@ -31,15 +39,71 @@
         <span>{{dates}}</span>
       </div>
       <p>{{description}}</p>
+      <p>{{url}} · {{#technologies}}{{value}} {{/technologies}}</p>
+      <ul>
+        {{#bullets}}
+        <li>{{value}}</li>
+        {{/bullets}}
+      </ul>
     </article>
     {{/projects}}
   </section>
+  {{/sectionVisibility.projects}} {{#sectionVisibility.skills}}
   <section>
-    <h2>Skills</h2>
-    <p>{{#skills}}{{value}} · {{/skills}}</p>
+    <h2>{{sectionTitles.skills}}</h2>
+    <p>{{#skills}}{{group}}: {{value}} · {{/skills}}</p>
   </section>
+  {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
   <section>
-    <h2>Education</h2>
-    <p>{{education}}</p>
+    <h2>{{sectionTitles.education}}</h2>
+    {{#education}}
+    <article>
+      <h3>{{degree}} · {{institution}}</h3>
+      <p>{{location}} · {{dates}}</p>
+      <p>{{details}}</p>
+    </article>
+    {{/education}}
   </section>
+  {{/sectionVisibility.education}} {{#sectionVisibility.certifications}}
+  <section>
+    <h2>{{sectionTitles.certifications}}</h2>
+    {{#certifications}}
+    <p>{{name}} · {{issuer}} · {{date}} · {{url}}</p>
+    {{/certifications}}
+  </section>
+  {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
+  <section>
+    <h2>{{sectionTitles.awards}}</h2>
+    {{#awards}}
+    <article>
+      <h3>{{name}}</h3>
+      <p>{{issuer}} · {{date}}</p>
+      <p>{{description}}</p>
+    </article>
+    {{/awards}}
+  </section>
+  {{/sectionVisibility.awards}} {{#sectionVisibility.publications}}
+  <section>
+    <h2>{{sectionTitles.publications}}</h2>
+    {{#publications}}
+    <article>
+      <h3>{{title}}</h3>
+      <p>{{publisher}} · {{date}} · {{url}}</p>
+      <p>{{description}}</p>
+    </article>
+    {{/publications}}
+  </section>
+  {{/sectionVisibility.publications}}
+  {{#sectionVisibility.customSections}}{{#customSections}}
+  <section>
+    <h2>{{title}}</h2>
+    {{#items}}
+    <article>
+      <h3>{{title}}</h3>
+      <p>{{subtitle}} · {{date}}</p>
+      <p>{{description}}</p>
+    </article>
+    {{/items}}
+  </section>
+  {{/customSections}}{{/sectionVisibility.customSections}}
 </main>

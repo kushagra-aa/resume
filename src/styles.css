@@ -859,6 +859,10 @@ pre code {
   box-shadow: 0 12px 34px rgba(23, 58, 64, 0.14);
 }
 
+.structured-preview-frame {
+  height: max(297mm, calc(100vh - 120px));
+}
+
 @media print {
   .print-shell {
     padding: 0;

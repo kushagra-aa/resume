@@ -575,6 +575,17 @@ function Dashboard() {
                     </div>
                     <div className="profile-card-actions">
                       <button
+                        className="button button-primary"
+                        onClick={() =>
+                          void navigate({
+                            to: '/structured/$resumeId',
+                            params: { resumeId: resume.id },
+                          })
+                        }
+                      >
+                        Preview / Export
+                      </button>
+                      <button
                         className="button button-ghost"
                         onClick={() => {
                           setStructuredRenameTarget(resume)

@@ -5,6 +5,7 @@ import { AppHeader } from '#/components/app-header'
 import { BackButton } from '#/components/back-button'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
+import { loadStructuredResumeDocument } from '#/features/resumes/structured-renderer'
 import type { ResumeDocument } from '#/models/resume'
 
 const A4_PAGE_HEIGHT_PX = 1123
@@ -33,8 +34,10 @@ function PrintRoute() {
 
   useEffect(() => {
     if (!resumeId) return
-    resumeRepository
-      .get(resumeId)
+    ;(resumeId.startsWith('structured-')
+      ? loadStructuredResumeDocument(resumeId.slice('structured-'.length))
+      : resumeRepository.get(resumeId)
+    )
       .then((loaded) => {
         if (loaded) setResume(loaded)
         else setError('That resume could not be found.')
@@ -104,12 +107,19 @@ function PrintRoute() {
           <div className="print-context">
             <BackButton
               label="Back to editor"
-              onClick={() =>
-                void navigate({
-                  to: '/editor/$resumeId',
-                  params: { resumeId: resume.id },
-                })
-              }
+              onClick={() => {
+                if (resumeId?.startsWith('structured-')) {
+                  void navigate({
+                    to: '/structured/$resumeId',
+                    params: { resumeId: resumeId.slice('structured-'.length) },
+                  })
+                } else {
+                  void navigate({
+                    to: '/editor/$resumeId',
+                    params: { resumeId: resume.id },
+                  })
+                }
+              }}
             />
             <span className="print-page-count">
               A4 · {pageCount} {pageCount === 1 ? 'page' : 'pages'}
