@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EditorResumeIdRouteImport } from './routes/editor/$resumeId'
 import { Route as PrintResumeIdRouteImport } from './routes/print/$resumeId'
+import { Route as ProfilesProfileIdRouteImport } from './routes/profiles/$profileId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,50 @@ const PrintResumeIdRoute = PrintResumeIdRouteImport.update({
   path: '/print/$resumeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilesProfileIdRoute = ProfilesProfileIdRouteImport.update({
+  id: '/profiles/$profileId',
+  path: '/profiles/$profileId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/editor/$resumeId': typeof EditorResumeIdRoute
   '/print/$resumeId': typeof PrintResumeIdRoute
+  '/profiles/$profileId': typeof ProfilesProfileIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/editor/$resumeId': typeof EditorResumeIdRoute
   '/print/$resumeId': typeof PrintResumeIdRoute
+  '/profiles/$profileId': typeof ProfilesProfileIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/editor/$resumeId': typeof EditorResumeIdRoute
   '/print/$resumeId': typeof PrintResumeIdRoute
+  '/profiles/$profileId': typeof ProfilesProfileIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/editor/$resumeId' | '/print/$resumeId'
+  fullPaths:
+    '/' | '/editor/$resumeId' | '/print/$resumeId' | '/profiles/$profileId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/editor/$resumeId' | '/print/$resumeId'
-  id: '__root__' | '/' | '/editor/$resumeId' | '/print/$resumeId'
+  to: '/' | '/editor/$resumeId' | '/print/$resumeId' | '/profiles/$profileId'
+  id:
+    | '__root__'
+    | '/'
+    | '/editor/$resumeId'
+    | '/print/$resumeId'
+    | '/profiles/$profileId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EditorResumeIdRoute: typeof EditorResumeIdRoute
   PrintResumeIdRoute: typeof PrintResumeIdRoute
+  ProfilesProfileIdRoute: typeof ProfilesProfileIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrintResumeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profiles/$profileId': {
+      id: '/profiles/$profileId'
+      path: '/profiles/$profileId'
+      fullPath: '/profiles/$profileId'
+      preLoaderRoute: typeof ProfilesProfileIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EditorResumeIdRoute: EditorResumeIdRoute,
   PrintResumeIdRoute: PrintResumeIdRoute,
+  ProfilesProfileIdRoute: ProfilesProfileIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
