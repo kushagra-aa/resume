@@ -14,6 +14,7 @@ import { Route as EditorResumeIdRouteImport } from './routes/editor/$resumeId'
 import { Route as PrintResumeIdRouteImport } from './routes/print/$resumeId'
 import { Route as ProfilesProfileIdRouteImport } from './routes/profiles/$profileId'
 import { Route as StructuredResumeIdRouteImport } from './routes/structured/$resumeId'
+import { Route as TemplatesTemplateIdRouteImport } from './routes/templates/$templateId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const StructuredResumeIdRoute = StructuredResumeIdRouteImport.update({
   path: '/structured/$resumeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemplatesTemplateIdRoute = TemplatesTemplateIdRouteImport.update({
+  id: '/templates/$templateId',
+  path: '/templates/$templateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/print/$resumeId': typeof PrintResumeIdRoute
   '/profiles/$profileId': typeof ProfilesProfileIdRoute
   '/structured/$resumeId': typeof StructuredResumeIdRoute
+  '/templates/$templateId': typeof TemplatesTemplateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/print/$resumeId': typeof PrintResumeIdRoute
   '/profiles/$profileId': typeof ProfilesProfileIdRoute
   '/structured/$resumeId': typeof StructuredResumeIdRoute
+  '/templates/$templateId': typeof TemplatesTemplateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/print/$resumeId': typeof PrintResumeIdRoute
   '/profiles/$profileId': typeof ProfilesProfileIdRoute
   '/structured/$resumeId': typeof StructuredResumeIdRoute
+  '/templates/$templateId': typeof TemplatesTemplateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +80,7 @@ export interface FileRouteTypes {
     | '/print/$resumeId'
     | '/profiles/$profileId'
     | '/structured/$resumeId'
+    | '/templates/$templateId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +88,7 @@ export interface FileRouteTypes {
     | '/print/$resumeId'
     | '/profiles/$profileId'
     | '/structured/$resumeId'
+    | '/templates/$templateId'
   id:
     | '__root__'
     | '/'
@@ -85,6 +96,7 @@ export interface FileRouteTypes {
     | '/print/$resumeId'
     | '/profiles/$profileId'
     | '/structured/$resumeId'
+    | '/templates/$templateId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +105,7 @@ export interface RootRouteChildren {
   PrintResumeIdRoute: typeof PrintResumeIdRoute
   ProfilesProfileIdRoute: typeof ProfilesProfileIdRoute
   StructuredResumeIdRoute: typeof StructuredResumeIdRoute
+  TemplatesTemplateIdRoute: typeof TemplatesTemplateIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StructuredResumeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/templates/$templateId': {
+      id: '/templates/$templateId'
+      path: '/templates/$templateId'
+      fullPath: '/templates/$templateId'
+      preLoaderRoute: typeof TemplatesTemplateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrintResumeIdRoute: PrintResumeIdRoute,
   ProfilesProfileIdRoute: ProfilesProfileIdRoute,
   StructuredResumeIdRoute: StructuredResumeIdRoute,
+  TemplatesTemplateIdRoute: TemplatesTemplateIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

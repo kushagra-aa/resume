@@ -23,7 +23,7 @@ import { exportResumePackage } from '#/features/resume/source-package'
 import { createStarterDocument } from '#/features/templates/starter-template'
 import type { ResumeDocument } from '#/models/resume'
 
-type EditorKind = 'html' | 'css'
+export type EditorKind = 'html' | 'css'
 
 const MIN_PREVIEW_ZOOM = 0.35
 const MAX_PREVIEW_ZOOM = 1.5
@@ -74,7 +74,7 @@ function validateSource(source: string, kind: EditorKind): string[] {
   return errors
 }
 
-function formatSource(source: string, kind: EditorKind) {
+export function formatSource(source: string, kind: EditorKind) {
   if (kind === 'css') {
     return source
       .replace(/\s*\{\s*/g, ' {\n  ')
@@ -105,7 +105,7 @@ function formatSource(source: string, kind: EditorKind) {
     .join('\n')
 }
 
-function CodeEditor({
+export function CodeEditor({
   kind,
   value,
   onChange,

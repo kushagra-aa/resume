@@ -23,3 +23,10 @@ export type ResumeTemplate = {
   css: string
   defaults: TemplateData
 }
+
+export type CustomTemplate = ResumeTemplate & {
+  schemaVersion: 1
+  sourceTemplateId: string | null
+  createdAt: string
+  updatedAt: string
+}

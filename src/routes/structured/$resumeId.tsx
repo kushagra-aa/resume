@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Download, Printer } from 'lucide-react'
+import { Code2, Download, Printer } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -7,12 +7,13 @@ import { AppHeader } from '#/components/app-header'
 import { BackButton } from '#/components/back-button'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { profileRepository } from '#/db/repositories/profile-repository'
+import { resumeRepository } from '#/db/repositories/resume-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportResumePackage } from '#/features/resume/source-package'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
-import { renderTemplate } from '#/features/templates/template-renderer'
+import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
 import type { Profile } from '#/models/profile'
@@ -45,65 +46,6 @@ function downloadSource(resume: ResumeDocument, type: 'html' | 'css') {
   link.download = `${resume.name.trim().replace(/\s+/g, '-').toLowerCase()}.${type}`
   link.click()
   URL.revokeObjectURL(url)
-}
-
-function createTemplatePreview(template: ResumeTemplate): ResumeDocument {
-  const defaults = template.defaults
-  const collection = (key: string) =>
-    Array.isArray(defaults[key]) ? (defaults[key] as unknown[]) : []
-  const asItems = (items: unknown[]) =>
-    items.map((item) =>
-      item && typeof item === 'object' && !Array.isArray(item)
-        ? {
-            ...(item as Record<string, unknown>),
-            bullets: Array.isArray((item as Record<string, unknown>).bullets)
-              ? ((item as Record<string, unknown>).bullets as unknown[]).map(
-                  (bullet) =>
-                    typeof bullet === 'string' ? { value: bullet } : bullet,
-                )
-              : [],
-          }
-        : item,
-    )
-  const data = {
-    ...defaults,
-    experience: asItems(collection('experience')),
-    projects: asItems(collection('projects')),
-    skills: collection('skills').map((skill) =>
-      typeof skill === 'string' ? { value: skill, group: '' } : skill,
-    ),
-    sectionTitles: {
-      summary: 'Profile',
-      experience: 'Experience',
-      education: 'Education',
-      skills: 'Skills',
-      projects: 'Projects',
-      certifications: 'Certifications',
-      awards: 'Awards',
-      publications: 'Publications',
-      customSections: 'Additional',
-    },
-    sectionVisibility: {
-      personal: true,
-      summary: Boolean(defaults.summary),
-      experience: collection('experience').length > 0,
-      education: Boolean(defaults.education),
-      skills: collection('skills').length > 0,
-      projects: collection('projects').length > 0,
-      certifications: collection('certifications').length > 0,
-      awards: collection('awards').length > 0,
-      publications: collection('publications').length > 0,
-      customSections: collection('customSections').length > 0,
-    },
-  }
-  return {
-    id: `template-preview-${template.id}`,
-    name: `${template.name} template preview`,
-    html: renderTemplate(template.html, data),
-    css: template.css,
-    createdAt: '',
-    updatedAt: '',
-  }
 }
 
 function VisibilityCheckbox({
@@ -309,6 +251,26 @@ function StructuredResumeBuilder() {
       },
     }))
   }
+  async function openPowerModeCopy() {
+    if (!renderedDocument || !resume) return
+    const now = new Date().toISOString()
+    const sourceCopy: ResumeDocument = {
+      ...renderedDocument,
+      id: crypto.randomUUID(),
+      name: `${resume.name} — Power Mode`,
+      createdAt: now,
+      updatedAt: now,
+    }
+    try {
+      await resumeRepository.create(sourceCopy)
+      void navigate({
+        to: '/editor/$resumeId',
+        params: { resumeId: sourceCopy.id },
+      })
+    } catch {
+      setError('A Power Mode source copy could not be created.')
+    }
+  }
 
   if (loading || !resume || !profile || !template || !renderedDocument)
     return (
@@ -362,6 +324,13 @@ function StructuredResumeBuilder() {
           onClick={() => exportResumePackage(renderedDocument)}
         >
           <Download size={14} /> ZIP
+        </button>
+        <button
+          className="button button-secondary"
+          title="Create an independent HTML/CSS source copy. Future Easy Mode changes will not update this copy."
+          onClick={() => void openPowerModeCopy()}
+        >
+          <Code2 size={14} /> Edit source copy
         </button>
         <button
           className="button button-primary"
@@ -424,7 +393,7 @@ function StructuredResumeBuilder() {
             <h2>Choose a template</h2>
             <div className="template-gallery">
               {templates.map((item) => {
-                const preview = createTemplatePreview(item)
+                const preview = createTemplatePreviewDocument(item)
                 return (
                   <button
                     className={`template-card${item.id === template.id ? ' selected' : ''}`}
@@ -446,7 +415,9 @@ function StructuredResumeBuilder() {
                       {item.description}
                     </span>
                     <span className="template-card-version">
-                      Built-in · v{item.version}
+                      {item.id.startsWith('custom-')
+                        ? 'Custom template'
+                        : `Built-in · v${item.version}`}
                     </span>
                   </button>
                 )

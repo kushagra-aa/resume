@@ -16,20 +16,32 @@ import { useEffect, useRef, useState } from 'react'
 import { AppDialog } from '#/components/app-dialog'
 import { AppHeader } from '#/components/app-header'
 import { ThemeToggle } from '#/components/theme-toggle'
+import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
+import { customTemplateRepository } from '#/db/repositories/custom-template-repository'
 import {
   createBlankDocument,
   createStarterDocument,
 } from '#/features/templates/starter-template'
 import { loadResumes } from '#/features/resume/services/resume-storage'
-import { importResumePackage } from '#/features/resume/source-package'
+import {
+  exportTemplatePackage,
+  importResumePackage,
+  importTemplatePackage,
+} from '#/features/resume/source-package'
 import { renderTemplate } from '#/features/templates/template-renderer'
 import { loadTemplates } from '#/features/templates/template-service'
+import {
+  duplicateTemplate,
+  renameCustomTemplate,
+} from '#/features/templates/custom-template-service'
+import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { createEmptyProfile } from '#/features/profiles/profile-defaults'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import type { ResumeTemplate } from '#/features/templates/template-types'
+import type { CustomTemplate } from '#/features/templates/template-types'
 import type { Profile } from '#/models/profile'
 import type { StructuredResume } from '#/models/structured-resume'
 import type { ResumeDocument } from '#/models/resume'
@@ -61,6 +73,7 @@ function Dashboard() {
   const [templates, setTemplates] = useState<ResumeTemplate[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
+  const templateImportInputRef = useRef<HTMLInputElement>(null)
   const [renameTarget, setRenameTarget] = useState<ResumeDocument | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [renameError, setRenameError] = useState<string | null>(null)
@@ -84,6 +97,11 @@ function Dashboard() {
   const [structuredRenameValue, setStructuredRenameValue] = useState('')
   const [structuredDeleteTarget, setStructuredDeleteTarget] =
     useState<StructuredResume | null>(null)
+  const [templateRenameTarget, setTemplateRenameTarget] =
+    useState<CustomTemplate | null>(null)
+  const [templateRenameValue, setTemplateRenameValue] = useState('')
+  const [templateDeleteTarget, setTemplateDeleteTarget] =
+    useState<CustomTemplate | null>(null)
 
   useEffect(() => {
     loadResumes()
@@ -93,6 +111,15 @@ function Dashboard() {
       )
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (activeTab !== 'templates') return
+    setTemplatesLoading(true)
+    loadTemplates()
+      .then(setTemplates)
+      .catch(() => setError('Templates could not be loaded.'))
+      .finally(() => setTemplatesLoading(false))
+  }, [activeTab])
 
   useEffect(() => {
     profileRepository
@@ -206,6 +233,98 @@ function Dashboard() {
       setStructuredDeleteTarget(null)
     } catch {
       setError('The resume could not be deleted.')
+    }
+  }
+
+  async function duplicateTemplateForEditing(template: ResumeTemplate) {
+    try {
+      const created = await duplicateTemplate(template)
+      setTemplates((current) => [created, ...current])
+      void navigate({
+        to: '/templates/$templateId',
+        params: { templateId: created.id },
+      })
+    } catch {
+      setError('The template could not be duplicated.')
+    }
+  }
+
+  async function importCustomTemplate(file: File) {
+    try {
+      const imported = await importTemplatePackage(file)
+      const availableTemplates = await loadTemplates()
+      setTemplates(availableTemplates)
+      const existingNames = new Set(
+        availableTemplates.map((template) => template.name.toLocaleLowerCase()),
+      )
+      let name = imported.name
+      if (existingNames.has(name.toLocaleLowerCase())) {
+        const baseName = `${name} (Imported)`
+        name = baseName
+        let copy = 2
+        while (existingNames.has(name.toLocaleLowerCase())) {
+          name = `${baseName} ${copy}`
+          copy += 1
+        }
+      }
+      const saved = await customTemplateRepository.create({
+        ...imported,
+        name,
+      })
+      setTemplates((current) => [saved, ...current])
+      void navigate({
+        to: '/templates/$templateId',
+        params: { templateId: saved.id },
+      })
+    } catch (importError) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : 'The custom template could not be imported.',
+      )
+    }
+  }
+
+  async function saveTemplateName() {
+    if (!templateRenameTarget) return
+    try {
+      const updated = await renameCustomTemplate(
+        templateRenameTarget,
+        templateRenameValue,
+      )
+      setTemplates((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      )
+      setTemplateRenameTarget(null)
+    } catch (renameError) {
+      setError(
+        renameError instanceof Error
+          ? renameError.message
+          : 'The template could not be renamed.',
+      )
+    }
+  }
+
+  async function deleteCustomTemplate() {
+    if (!templateDeleteTarget) return
+    const usageCount = structuredResumes.filter(
+      (resume) => resume.templateId === templateDeleteTarget.id,
+    ).length
+    if (usageCount > 0) {
+      setError(
+        `This template is used by ${usageCount} resume${usageCount === 1 ? '' : 's'}. Reassign those resumes before deleting it.`,
+      )
+      setTemplateDeleteTarget(null)
+      return
+    }
+    try {
+      await customTemplateRepository.delete(templateDeleteTarget.id)
+      setTemplates((current) =>
+        current.filter((item) => item.id !== templateDeleteTarget.id),
+      )
+      setTemplateDeleteTarget(null)
+    } catch {
+      setError('The custom template could not be deleted.')
     }
   }
 
@@ -452,6 +571,28 @@ function Dashboard() {
               <UserRound size={15} aria-hidden="true" /> New profile
             </button>
           ) : null}
+          {activeTab === 'templates' ? (
+            <>
+              <input
+                ref={templateImportInputRef}
+                className="sr-only"
+                type="file"
+                accept=".zip,application/zip"
+                aria-label="Import custom template package"
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ''
+                  if (file) void importCustomTemplate(file)
+                }}
+              />
+              <button
+                className="button button-primary dashboard-tab-action"
+                onClick={() => templateImportInputRef.current?.click()}
+              >
+                <Upload size={15} aria-hidden="true" /> Import template
+              </button>
+            </>
+          ) : null}
         </nav>
 
         {loading ? <p className="dashboard-message">Loading resumes…</p> : null}
@@ -693,12 +834,108 @@ function Dashboard() {
           </div>
         ) : null}
         {activeTab === 'templates' ? (
-          <section className="dashboard-empty island-shell">
-            <h2>Custom templates</h2>
-            <p>
-              Your custom templates will appear here. Template duplication and
-              editing are planned for Phase 6.
-            </p>
+          <section className="template-library" aria-label="Template library">
+            <div className="template-library-heading">
+              <div>
+                <p className="panel-kicker">Template library</p>
+                <h2>Built-in and custom templates</h2>
+                <p>
+                  Built-in templates are read-only. Duplicate one to customize
+                  it.
+                </p>
+              </div>
+            </div>
+            {templatesLoading ? (
+              <p className="dashboard-message">Loading templates…</p>
+            ) : templates.length ? (
+              <div className="template-library-grid">
+                {templates.map((template) => {
+                  const custom = template.id.startsWith('custom-')
+                    ? (template as CustomTemplate)
+                    : null
+                  const preview = createTemplatePreviewDocument(template)
+                  return (
+                    <article
+                      className="template-library-card"
+                      key={template.id}
+                    >
+                      <div className="template-library-preview">
+                        <iframe
+                          title={`${template.name} sample`}
+                          sandbox="allow-scripts"
+                          tabIndex={-1}
+                          srcDoc={createResumeSrcDoc(preview, false)}
+                        />
+                      </div>
+                      <div className="template-library-card-body">
+                        <div className="template-library-card-heading">
+                          <div>
+                            <h3>{template.name}</h3>
+                            <p>{template.description}</p>
+                          </div>
+                          <span>
+                            {custom
+                              ? 'Custom'
+                              : `Built-in · v${template.version}`}
+                          </span>
+                        </div>
+                        <div className="template-library-actions">
+                          {custom ? (
+                            <>
+                              <button
+                                className="button button-primary"
+                                onClick={() =>
+                                  void navigate({
+                                    to: '/templates/$templateId',
+                                    params: { templateId: custom.id },
+                                  })
+                                }
+                              >
+                                Edit HTML/CSS
+                              </button>
+                              <button
+                                className="button button-ghost"
+                                onClick={() => {
+                                  setTemplateRenameTarget(custom)
+                                  setTemplateRenameValue(custom.name)
+                                }}
+                              >
+                                Rename
+                              </button>
+                              <button
+                                className="button button-ghost"
+                                onClick={() => exportTemplatePackage(custom)}
+                              >
+                                Export
+                              </button>
+                              <button
+                                className="button button-ghost profile-danger-action"
+                                onClick={() => setTemplateDeleteTarget(custom)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          ) : null}
+                          <button
+                            className="button button-secondary"
+                            onClick={() =>
+                              void duplicateTemplateForEditing(template)
+                            }
+                          >
+                            <Copy size={14} aria-hidden="true" /> Duplicate
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="dashboard-empty island-shell">
+                <h2>No templates available</h2>
+                <p>Check the built-in template assets and try again.</p>
+              </div>
+            )}
           </section>
         ) : null}
       </section>
@@ -979,6 +1216,81 @@ function Dashboard() {
           <span>You can keep the resume if you are not sure.</span>
         </div>
         <p className="dialog-confirmation-name">{deleteTarget?.name}</p>
+      </AppDialog>
+
+      <AppDialog
+        open={Boolean(templateRenameTarget)}
+        title="Rename custom template"
+        description="The template name is global and is shared by resumes that use it."
+        onClose={() => setTemplateRenameTarget(null)}
+        actions={
+          <>
+            <button
+              className="button button-secondary"
+              onClick={() => setTemplateRenameTarget(null)}
+            >
+              Cancel
+            </button>
+            <button
+              className="button button-primary"
+              onClick={() => void saveTemplateName()}
+            >
+              Save name
+            </button>
+          </>
+        }
+      >
+        <label className="dialog-field">
+          Template name
+          <input
+            autoFocus
+            value={templateRenameValue}
+            onChange={(event) => setTemplateRenameValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void saveTemplateName()
+            }}
+          />
+        </label>
+      </AppDialog>
+
+      <AppDialog
+        open={Boolean(templateDeleteTarget)}
+        title="Delete custom template?"
+        description="This removes the global custom template. Built-in templates cannot be deleted."
+        icon={<TriangleAlert size={20} aria-hidden="true" />}
+        tone="danger"
+        onClose={() => setTemplateDeleteTarget(null)}
+        actions={
+          <>
+            <button
+              className="button button-secondary"
+              onClick={() => setTemplateDeleteTarget(null)}
+            >
+              Keep template
+            </button>
+            <button
+              className="button button-danger"
+              disabled={structuredResumes.some(
+                (resume) => resume.templateId === templateDeleteTarget?.id,
+              )}
+              onClick={() => void deleteCustomTemplate()}
+            >
+              Delete template
+            </button>
+          </>
+        }
+      >
+        <div className="dialog-warning">
+          <strong>This action cannot be undone.</strong>
+          <span>
+            {structuredResumes.some(
+              (resume) => resume.templateId === templateDeleteTarget?.id,
+            )
+              ? 'This template is in use. Reassign its resumes before deleting it.'
+              : 'This template is not used by any profile-based resumes.'}
+          </span>
+        </div>
+        <p className="dialog-confirmation-name">{templateDeleteTarget?.name}</p>
       </AppDialog>
     </main>
   )

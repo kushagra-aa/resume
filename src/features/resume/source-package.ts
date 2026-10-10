@@ -1,11 +1,25 @@
 import { z } from 'zod'
 
+import type { CustomTemplate } from '#/features/templates/template-types'
 import type { ResumeDocument } from '#/models/resume'
+import {
+  parseCustomTemplate,
+  templateControlSchema,
+} from '#/schemas/custom-template'
 
 const manifestSchema = z.object({
   format: z.literal('resume-source-package'),
   packageVersion: z.literal(1),
   name: z.string().trim().min(1),
+})
+const templateManifestSchema = z.object({
+  format: z.literal('resume-template-package'),
+  packageVersion: z.literal(1),
+  name: z.string().trim().min(1).max(120),
+  description: z.string().max(500),
+  version: z.string().min(1).max(32),
+  controls: z.array(templateControlSchema).max(30),
+  defaults: z.record(z.string(), z.unknown()),
 })
 
 type ZipEntry = {
@@ -222,6 +236,69 @@ export function exportResumePackage(document: ResumeDocument) {
   const filename =
     document.name.trim().replace(/\s+/g, '-').toLowerCase() || 'resume'
   downloadBytes(bytes, `${filename}.zip`)
+}
+
+export function createTemplatePackage(template: CustomTemplate) {
+  const valid = parseCustomTemplate(template)
+  const manifest = JSON.stringify(
+    {
+      format: 'resume-template-package',
+      packageVersion: 1,
+      name: valid.name,
+      description: valid.description,
+      version: valid.version,
+      controls: valid.controls,
+      defaults: valid.defaults,
+    },
+    null,
+    2,
+  )
+  return createZip([
+    { name: 'manifest.json', data: encoder.encode(manifest) },
+    { name: 'resume.html', data: encoder.encode(valid.html) },
+    { name: 'resume.css', data: encoder.encode(valid.css) },
+  ])
+}
+
+export function exportTemplatePackage(template: CustomTemplate) {
+  const filename =
+    template.name
+      .trim()
+      .replace(/[^a-z0-9]+/gi, '-')
+      .toLowerCase() || 'template'
+  downloadBytes(createTemplatePackage(template), `${filename}-template.zip`)
+}
+
+export async function importTemplatePackage(file: File) {
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  if (bytes.byteLength > 5_000_000)
+    throw new Error('Template packages must be smaller than 5 MB.')
+  const entries = readZip(bytes)
+  const manifestBytes = entries.get('manifest.json')
+  const htmlBytes = entries.get('resume.html')
+  const cssBytes = entries.get('resume.css')
+  if (!manifestBytes || !htmlBytes || !cssBytes)
+    throw new Error(
+      'The template package must contain manifest.json, resume.html, and resume.css.',
+    )
+  const manifest = templateManifestSchema.parse(
+    JSON.parse(decoder.decode(manifestBytes)),
+  )
+  const now = new Date().toISOString()
+  return parseCustomTemplate({
+    id: `custom-${crypto.randomUUID()}`,
+    name: manifest.name,
+    description: manifest.description,
+    version: manifest.version,
+    schemaVersion: 1,
+    sourceTemplateId: null,
+    controls: manifest.controls,
+    html: decoder.decode(htmlBytes),
+    css: decoder.decode(cssBytes),
+    defaults: manifest.defaults,
+    createdAt: now,
+    updatedAt: now,
+  })
 }
 
 export async function importResumePackage(file: File) {
