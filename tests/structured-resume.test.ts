@@ -6,8 +6,10 @@ import { resumeDatabase } from '#/db/client'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
+import { renderStructuredResume } from '#/features/resumes/structured-renderer'
 import type { ResumeDocument } from '#/models/resume'
 import { completeProfileFixture } from './fixtures/structured-render-fixtures'
+import { completeTemplateFixture } from './fixtures/structured-render-fixtures'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 
 describe('structured resume persistence and legacy compatibility', () => {
@@ -68,5 +70,28 @@ describe('structured resume persistence and legacy compatibility', () => {
     expect(await structuredResumeRepository.get('broken')).toBeNull()
     expect(await structuredResumeRepository.list()).toEqual([])
     expect(await resumeRepository.get(legacy.id)).toEqual(legacy)
+  })
+
+  it('creates profile data, saves resume selections, and renders the selected preview source', async () => {
+    const profile = structuredClone(completeProfileFixture)
+    await profileRepository.create(profile)
+    const resume = createStructuredResume(profile, completeTemplateFixture.id)
+    resume.selection.sections.experience = false
+    resume.selection.items.skills!['skills-one:skill:0'] = false
+    await structuredResumeRepository.create(resume)
+
+    const reopened = await structuredResumeRepository.get(resume.id)
+    const preview = renderStructuredResume(
+      profile,
+      reopened!,
+      completeTemplateFixture,
+    )
+
+    expect(preview.html).not.toContain('Staff Engineer')
+    expect(preview.html).not.toContain('Engineering TypeScript')
+    expect(preview.html).toContain('React')
+    expect((await profileRepository.get(profile.id))?.experience).toEqual(
+      profile.experience,
+    )
   })
 })

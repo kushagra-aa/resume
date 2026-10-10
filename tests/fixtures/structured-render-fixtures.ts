@@ -104,6 +104,7 @@ export const completeTemplateFixture: ResumeTemplate = {
   name: 'Fixture',
   description: 'Template covering all profile sections',
   version: '1.0.0',
+  controls: [],
   defaults: {},
   css: '.resume { color: var(--resume-accent, #222); }',
   html: `<main class="resume"><header><h1>{{name}}</h1><p>{{title}}</p><p>{{email}} {{phone}} {{location}} {{website}} {{linkedin}} {{github}}</p></header>

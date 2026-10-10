@@ -64,6 +64,23 @@ describe('structured resume rendering', () => {
     expect(profile).toEqual(before)
   })
 
+  it('honors individual personal fields, skills, and custom section entries', () => {
+    const resume = makeResume()
+    resume.selection.items.personal!.email = false
+    resume.selection.items.skills!['skills-one:skill:0'] = false
+    resume.selection.items.customSections!['custom-one:custom-item-one'] = false
+    const rendered = renderStructuredResume(
+      completeProfileFixture,
+      resume,
+      completeTemplateFixture,
+    )
+
+    expect(rendered.html).not.toContain('morgan@example.test')
+    expect(rendered.html).not.toContain('Engineering TypeScript')
+    expect(rendered.html).not.toContain('Mentors early-career developers')
+    expect(rendered.html).toContain('React')
+  })
+
   it('hides empty optional sections and resolves missing content to empty values', () => {
     const profile = structuredClone(completeProfileFixture)
     profile.awards = []
@@ -86,14 +103,37 @@ describe('structured resume rendering', () => {
   it('applies safe template configuration and rejects malformed structured data', () => {
     const resume = makeResume()
     resume.templateConfiguration.accent = '#123456'
+    resume.templateConfiguration.fontSize = 11
     resume.templateConfiguration['bad};<script'] = 'alert(1)'
+    const template = structuredClone(completeTemplateFixture)
+    template.controls = [
+      {
+        key: 'accent',
+        label: 'Accent color',
+        type: 'color',
+        variable: '--resume-accent',
+        defaultValue: '#000000',
+      },
+      {
+        key: 'fontSize',
+        label: 'Font size',
+        type: 'range',
+        variable: '--resume-font-size',
+        min: 9,
+        max: 12,
+        step: 0.5,
+        unit: 'pt',
+        defaultValue: 10,
+      },
+    ]
     const rendered = renderStructuredResume(
       completeProfileFixture,
       resume,
-      completeTemplateFixture,
+      template,
     )
 
     expect(rendered.css).toContain('--resume-accent: #123456;')
+    expect(rendered.css).toContain('--resume-font-size: 11pt;')
     expect(rendered.css).not.toContain('<script')
     expect(() => parseStructuredResume({ ...resume, profileId: '' })).toThrow()
   })

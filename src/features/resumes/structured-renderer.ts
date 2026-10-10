@@ -47,10 +47,18 @@ export function createStructuredTemplateData(
   const { selection } = resume
   const selected = (section: ProfileSectionKey, id?: string) =>
     isSelected(selection, section, id)
+  const personalValue = (key: keyof Profile['personal']) =>
+    selected('personal', key) ? profile.personal[key] : ''
   const sectionVisibility = {
     personal:
       selected('personal') &&
-      Object.values(profile.personal).some((value) => value.trim().length > 0),
+      (
+        Object.entries(profile.personal) as Array<
+          [keyof Profile['personal'], string]
+        >
+      ).some(
+        ([key, value]) => selected('personal', key) && value.trim().length > 0,
+      ),
     summary: selected('summary') && profile.summary.trim().length > 0,
     experience:
       selected('experience') &&
@@ -61,7 +69,11 @@ export function createStructuredTemplateData(
     skills:
       selected('skills') &&
       profile.skills.some(
-        (group) => selected('skills', group.id) && group.skills.length > 0,
+        (group) =>
+          selected('skills', group.id) &&
+          group.skills.some((_, index) =>
+            selected('skills', `${group.id}:skill:${index}`),
+          ),
       ),
     projects:
       selected('projects') &&
@@ -85,14 +97,14 @@ export function createStructuredTemplateData(
   }
 
   return {
-    name: selected('personal') ? profile.personal.fullName : '',
-    title: selected('personal') ? profile.personal.headline : '',
-    email: selected('personal') ? profile.personal.email : '',
-    phone: selected('personal') ? profile.personal.phone : '',
-    location: selected('personal') ? profile.personal.location : '',
-    website: selected('personal') ? profile.personal.website : '',
-    linkedin: selected('personal') ? profile.personal.linkedin : '',
-    github: selected('personal') ? profile.personal.github : '',
+    name: personalValue('fullName'),
+    title: personalValue('headline'),
+    email: personalValue('email'),
+    phone: personalValue('phone'),
+    location: personalValue('location'),
+    website: personalValue('website'),
+    linkedin: personalValue('linkedin'),
+    github: personalValue('github'),
     summary: selected('summary') ? profile.summary : '',
     sectionTitles: Object.fromEntries(
       [
@@ -149,7 +161,11 @@ export function createStructuredTemplateData(
       ? profile.skills
           .filter((group) => selected('skills', group.id))
           .flatMap((group) =>
-            group.skills.map((value) => ({ value, group: group.name })),
+            group.skills
+              .filter((_, index) =>
+                selected('skills', `${group.id}:skill:${index}`),
+              )
+              .map((value) => ({ value, group: group.name })),
           )
       : [],
     projects: selected('projects')
@@ -177,9 +193,14 @@ export function createStructuredTemplateData(
       ? profile.publications.filter((item) => selected('publications', item.id))
       : [],
     customSections: selected('customSections')
-      ? profile.customSections.filter((item) =>
-          selected('customSections', item.id),
-        )
+      ? profile.customSections
+          .filter((item) => selected('customSections', item.id))
+          .map((section) => ({
+            ...section,
+            items: section.items.filter((item) =>
+              selected('customSections', `${section.id}:${item.id}`),
+            ),
+          }))
       : [],
   }
 }
@@ -187,11 +208,20 @@ export function createStructuredTemplateData(
 function applyTemplateConfiguration(
   css: string,
   configuration: Record<string, string | number | boolean>,
+  template: ResumeTemplate,
 ) {
-  const declarations = Object.entries(configuration).flatMap(([key, value]) => {
-    if (!/^[a-z][a-z0-9-]*$/i.test(key)) return []
-    const safeValue = String(value).replace(/[{};<>]/g, '')
-    return [`--resume-${key}: ${safeValue};`]
+  const declarations = template.controls.flatMap((control) => {
+    const value = configuration[control.key] ?? control.defaultValue
+    const valid =
+      control.type === 'select'
+        ? control.options?.some((option) => option.value === value)
+        : control.type === 'color'
+          ? typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+          : typeof value === 'number' &&
+            Number.isFinite(value) &&
+            value >= (control.min ?? 0) &&
+            value <= (control.max ?? 100)
+    return valid ? [`${control.variable}: ${value}${control.unit ?? ''};`] : []
   })
   return declarations.length
     ? `:root { ${declarations.join(' ')} }\n${css}`
@@ -208,7 +238,11 @@ export function renderStructuredResume(
     id: resume.id,
     name: resume.name,
     html: renderTemplate(template.html, data),
-    css: applyTemplateConfiguration(template.css, resume.templateConfiguration),
+    css: applyTemplateConfiguration(
+      template.css,
+      resume.templateConfiguration,
+      template,
+    ),
     createdAt: resume.createdAt,
     updatedAt: resume.updatedAt,
   }

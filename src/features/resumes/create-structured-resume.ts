@@ -24,14 +24,21 @@ export function createStructuredResume(
 ): StructuredResume {
   const now = new Date().toISOString()
   const itemIds: Partial<Record<ProfileSectionKey, string[]>> = {
+    personal: Object.keys(profile.personal),
     experience: profile.experience.map((item) => item.id),
     education: profile.education.map((item) => item.id),
-    skills: profile.skills.map((item) => item.id),
+    skills: profile.skills.flatMap((group) => [
+      group.id,
+      ...group.skills.map((_, index) => `${group.id}:skill:${index}`),
+    ]),
     projects: profile.projects.map((item) => item.id),
     certifications: profile.certifications.map((item) => item.id),
     awards: profile.awards.map((item) => item.id),
     publications: profile.publications.map((item) => item.id),
-    customSections: profile.customSections.map((item) => item.id),
+    customSections: profile.customSections.flatMap((section) => [
+      section.id,
+      ...section.items.map((item) => `${section.id}:${item.id}`),
+    ]),
   }
 
   return {

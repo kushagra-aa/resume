@@ -4,7 +4,7 @@
 }
 :root {
   color: #19252b;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--resume-font-family, Arial, Helvetica, sans-serif);
   background: #fff;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -19,7 +19,7 @@ body {
 .resume {
   width: 210mm;
   min-height: 297mm;
-  padding: 16mm;
+  padding: var(--resume-page-margin, 16mm);
   margin: 0 auto;
 }
 header {
@@ -27,14 +27,15 @@ header {
   justify-content: space-between;
   gap: 12mm;
   padding-bottom: 10mm;
-  border-bottom: 4px solid #35a69d;
+  border-bottom: 4px solid var(--resume-accent, #35a69d);
 }
 .eyebrow,
 h2 {
-  color: #328f97;
+  color: var(--resume-accent, #328f97);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.16em;
+  text-transform: var(--resume-heading-transform, uppercase);
 }
 .eyebrow {
   margin: 0 0 5mm;
@@ -64,15 +65,15 @@ aside {
   border-right: 1px solid #d7e5e2;
 }
 section {
-  margin-top: 9mm;
+  margin-top: var(--resume-section-spacing, 9mm);
 }
 h2 {
   margin: 0 0 4mm;
 }
 p,
 li {
-  font-size: 10.2pt;
-  line-height: 1.4;
+  font-size: var(--resume-font-size, 10.2pt);
+  line-height: var(--resume-line-spacing, 1.4);
 }
 .skills {
   display: flex;
@@ -83,7 +84,7 @@ li {
   padding: 1.5mm 2mm;
   border-radius: 3px;
   color: #fff;
-  background: #328f97;
+  background: var(--resume-accent, #328f97);
   font-size: 9.5pt;
 }
 article {

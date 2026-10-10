@@ -7,6 +7,22 @@ const templateMetadataSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
   version: z.string().min(1),
+  controls: z.array(
+    z.object({
+      key: z.string().regex(/^[a-z][a-zA-Z0-9]*$/),
+      label: z.string().min(1),
+      type: z.enum(['select', 'range', 'color']),
+      variable: z.string().regex(/^--resume-[a-z][a-z0-9-]*$/),
+      options: z
+        .array(z.object({ label: z.string(), value: z.string() }))
+        .optional(),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      step: z.number().optional(),
+      unit: z.string().optional(),
+      defaultValue: z.union([z.string(), z.number()]),
+    }),
+  ),
 })
 
 const templateDefinitions = [
