@@ -4,7 +4,7 @@ import type { ResumeTemplate } from '#/features/templates/template-types'
 export const completeProfileFixture: Profile = {
   id: 'profile-structured-fixture',
   name: 'Morgan Chen',
-  schemaVersion: 1,
+  schemaVersion: 2,
   personal: {
     fullName: 'Morgan Chen',
     headline: 'Staff Software Engineer',
@@ -15,6 +15,13 @@ export const completeProfileFixture: Profile = {
     linkedin: 'linkedin.com/in/morgan',
     github: 'github.com/morgan',
   },
+  links: [
+    {
+      id: 'link-github',
+      label: 'GitHub',
+      url: 'https://github.com/morgan',
+    },
+  ],
   summary: 'Builds reliable software products.',
   experience: [
     {

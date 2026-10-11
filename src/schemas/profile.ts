@@ -7,16 +7,26 @@ const isoDateString = z
   .refine((value) => !Number.isNaN(Date.parse(value)), {
     message: 'Expected a valid date string',
   })
+const bulletRows = z.array(text).transform((values) => {
+  const rows = values.map((value) => value.trim())
+  while (rows.length && !rows.at(-1)) rows.pop()
+  return rows
+})
 
 const personalInfoSchema = z.object({
   fullName: text,
   headline: text,
+  location: text,
   email: text,
   phone: text,
-  location: text,
   website: text,
   linkedin: text,
   github: text,
+})
+const contactLinkSchema = z.object({
+  id,
+  label: text,
+  url: text,
 })
 
 const experienceSchema = z.object({
@@ -27,7 +37,7 @@ const experienceSchema = z.object({
   startDate: text,
   endDate: text,
   current: z.boolean(),
-  bullets: z.array(text),
+  bullets: bulletRows,
 })
 
 const educationSchema = z.object({
@@ -48,7 +58,7 @@ const projectSchema = z.object({
   description: text,
   url: text,
   technologies: z.array(text),
-  bullets: z.array(text),
+  bullets: bulletRows,
 })
 
 const certificationSchema = z.object({
@@ -93,8 +103,9 @@ const customSectionSchema = z.object({
 export const profileSchema = z.object({
   id,
   name: z.string().trim().min(1),
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(2),
   personal: personalInfoSchema,
+  links: z.array(contactLinkSchema),
   summary: text,
   experience: z.array(experienceSchema),
   education: z.array(educationSchema),

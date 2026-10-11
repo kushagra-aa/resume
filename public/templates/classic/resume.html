@@ -4,8 +4,12 @@
     <p class="title">{{title}}</p>
     {{#sectionVisibility.personal}}
     <p class="contact">
-      {{email}} · {{phone}} · {{location}} · {{website}} · {{linkedin}} ·
-      {{github}}
+      {{#contactDetails}}<span>{{value}}</span>{{/contactDetails}} {{#links}}<a
+        href="{{href}}"
+        aria-label="{{label}}"
+        ><span class="contact-link-icon" aria-hidden="true">{{iconText}}</span
+        >{{label}}</a
+      >{{/links}}
     </p>
     {{/sectionVisibility.personal}} {{#sectionVisibility.summary}}
     <p class="summary">{{summary}}</p>
@@ -16,16 +20,21 @@
     <h2>{{sectionTitles.experience}}</h2>
     {{#experience}}
     <article>
+      {{#hasHeadingOrDates}}
       <div class="row">
-        <h3>{{role}} · {{company}}</h3>
-        <span>{{dates}}</span>
+        {{#hasHeading}}
+        <h3>{{heading}}</h3>
+        {{/hasHeading}} {{#hasDates}}<span>{{dates}}</span>{{/hasDates}}
       </div>
-      <p class="muted">{{location}}</p>
+      {{/hasHeadingOrDates}} {{#hasMeta}}
+      <p class="muted">{{meta}}</p>
+      {{/hasMeta}} {{#hasBullets}}
       <ul>
         {{#bullets}}
         <li>{{value}}</li>
         {{/bullets}}
       </ul>
+      {{/hasBullets}}
     </article>
     {{/experience}}
   </section>
@@ -34,17 +43,23 @@
     <h2>{{sectionTitles.projects}}</h2>
     {{#projects}}
     <article>
-      <div class="row">
-        <h3>{{name}}</h3>
-        <span>{{dates}}</span>
-      </div>
+      {{#hasHeading}}
+      <h3>{{heading}}</h3>
+      {{/hasHeading}} {{#hasDescription}}
       <p>{{description}}</p>
-      <p>{{url}} · {{#technologies}}{{value}} {{/technologies}}</p>
+      {{/hasDescription}} {{#hasUrl}}
+      <p><a href="{{url}}">{{meta}}</a></p>
+      {{/hasUrl}} {{#hasTechnologies}}
+      <p>
+        {{#technologies}}<span class="skill">{{value}}</span>{{/technologies}}
+      </p>
+      {{/hasTechnologies}} {{#hasBullets}}
       <ul>
         {{#bullets}}
         <li>{{value}}</li>
         {{/bullets}}
       </ul>
+      {{/hasBullets}}
     </article>
     {{/projects}}
   </section>
@@ -52,7 +67,10 @@
   <section>
     <h2>{{sectionTitles.skills}}</h2>
     <p>
-      {{#skills}}<span class="skill">{{group}}: {{value}}</span> {{/skills}}
+      {{#skills}}<span class="skill"
+        >{{#group}}{{group}}: {{/group}}{{value}}</span
+      >
+      {{/skills}}
     </p>
   </section>
   {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
@@ -60,9 +78,13 @@
     <h2>{{sectionTitles.education}}</h2>
     {{#education}}
     <article>
-      <h3>{{degree}} · {{institution}}</h3>
-      <p>{{location}} · {{dates}}</p>
+      {{#hasHeading}}
+      <h3>{{heading}}</h3>
+      {{/hasHeading}} {{#hasMeta}}
+      <p>{{meta}}</p>
+      {{/hasMeta}} {{#hasDetails}}
       <p>{{details}}</p>
+      {{/hasDetails}}
     </article>
     {{/education}}
   </section>
@@ -70,7 +92,7 @@
   <section>
     <h2>{{sectionTitles.certifications}}</h2>
     {{#certifications}}
-    <p>{{name}} · {{issuer}} · {{date}} · {{url}}</p>
+    <p>{{display}}</p>
     {{/certifications}}
   </section>
   {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
@@ -78,9 +100,13 @@
     <h2>{{sectionTitles.awards}}</h2>
     {{#awards}}
     <article>
+      {{#hasHeading}}
       <h3>{{name}}</h3>
-      <p>{{issuer}} · {{date}}</p>
+      {{/hasHeading}} {{#meta}}
+      <p>{{meta}}</p>
+      {{/meta}} {{#hasDescription}}
       <p>{{description}}</p>
+      {{/hasDescription}}
     </article>
     {{/awards}}
   </section>
@@ -89,21 +115,30 @@
     <h2>{{sectionTitles.publications}}</h2>
     {{#publications}}
     <article>
+      {{#hasHeading}}
       <h3>{{title}}</h3>
-      <p>{{publisher}} · {{date}} · {{url}}</p>
+      {{/hasHeading}} {{#meta}}
+      <p>{{meta}}</p>
+      {{/meta}} {{#hasDescription}}
       <p>{{description}}</p>
+      {{/hasDescription}}
     </article>
     {{/publications}}
   </section>
   {{/sectionVisibility.publications}}
   {{#sectionVisibility.customSections}}{{#customSections}}
   <section>
+    {{#hasTitle}}
     <h2>{{title}}</h2>
-    {{#items}}
+    {{/hasTitle}} {{#items}}
     <article>
+      {{#hasTitle}}
       <h3>{{title}}</h3>
-      <p>{{subtitle}} · {{date}}</p>
+      {{/hasTitle}} {{#hasMeta}}
+      <p>{{meta}}</p>
+      {{/hasMeta}} {{#hasDescription}}
       <p>{{description}}</p>
+      {{/hasDescription}}
     </article>
     {{/items}}
   </section>

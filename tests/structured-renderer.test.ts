@@ -100,6 +100,82 @@ describe('structured resume rendering', () => {
     expect(rendered.html).not.toContain('Reliable Systems')
   })
 
+  it('omits blank accomplishments and sections with no renderable content', () => {
+    const profile = structuredClone(completeProfileFixture)
+    profile.summary = ''
+    profile.experience = [
+      {
+        id: 'blank-experience',
+        company: '',
+        role: 'Engineer',
+        location: '',
+        startDate: '',
+        endDate: '',
+        current: false,
+        bullets: ['', '  '],
+      },
+    ]
+    profile.education = []
+    profile.skills = [{ id: 'blank-skills', name: '', skills: [' ', ''] }]
+    profile.projects = [
+      {
+        id: 'blank-project',
+        name: '',
+        description: '',
+        url: '',
+        technologies: [],
+        bullets: ['  '],
+      },
+    ]
+    profile.certifications = []
+    profile.awards = []
+    profile.publications = []
+    profile.customSections = [{ id: 'blank-custom', title: 'Extra', items: [] }]
+    const resume = createStructuredResume(profile, 'fixture-template')
+    const data = createStructuredTemplateData(profile, resume)
+    const template = {
+      ...completeTemplateFixture,
+      html: '{{#sectionVisibility.experience}}{{#experience}}{{#hasBullets}}<ul>{{#bullets}}<li>{{value}}</li>{{/bullets}}</ul>{{/hasBullets}}{{/experience}}{{/sectionVisibility.experience}}{{#sectionVisibility.projects}}project{{/sectionVisibility.projects}}{{#sectionVisibility.customSections}}custom{{/sectionVisibility.customSections}}',
+    }
+    const rendered = renderStructuredResume(profile, resume, template)
+
+    expect(data.sectionVisibility.experience).toBe(true)
+    expect(data.sectionVisibility.education).toBe(false)
+    expect(data.sectionVisibility.skills).toBe(false)
+    expect(data.sectionVisibility.projects).toBe(false)
+    expect(data.sectionVisibility.customSections).toBe(false)
+    expect(
+      (data.experience as Array<{ bullets: Array<{ value: string }> }>)[0]
+        ?.bullets,
+    ).toEqual([])
+    expect(rendered.html).not.toContain('<ul>')
+    expect(rendered.html).not.toContain('project')
+    expect(rendered.html).not.toContain('custom')
+  })
+
+  it('uses independent stable link selections and safe template URLs', () => {
+    const resume = makeResume()
+    const template = {
+      ...completeTemplateFixture,
+      html: '{{#sectionVisibility.personal}}{{#links}}<a href="{{href}}">{{label}} {{iconText}}</a>{{/links}}{{/sectionVisibility.personal}}',
+    }
+    const visible = renderStructuredResume(
+      completeProfileFixture,
+      resume,
+      template,
+    )
+    expect(visible.html).toContain('https://github.com/morgan')
+    expect(visible.html).toContain('GitHub')
+
+    resume.selection.items.personal!['link:link-github'] = false
+    const hidden = renderStructuredResume(
+      completeProfileFixture,
+      resume,
+      template,
+    )
+    expect(hidden.html).not.toContain('github.com/morgan')
+  })
+
   it('applies safe template configuration and rejects malformed structured data', () => {
     const resume = makeResume()
     resume.templateConfiguration.accent = '#123456'

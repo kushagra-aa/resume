@@ -42,6 +42,23 @@ h1 {
   color: #6b6b6b;
   font-size: var(--resume-font-size, 10.5pt);
 }
+.contact > span,
+.contact > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5mm;
+  margin-right: 2mm;
+}
+.contact-link-icon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 4mm;
+  height: 4mm;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 7pt;
+  font-weight: 700;
+}
 .summary {
   max-width: 165mm;
   margin: 6mm 0 0;

@@ -13,6 +13,7 @@ import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportResumePackage } from '#/features/resume/source-package'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
+import { inferContactLink } from '#/features/profiles/contact-links'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
@@ -504,9 +505,10 @@ function StructuredResumeBuilder() {
               {resume.selection.sections.personal ? (
                 <div className="builder-nested-list">
                   {(
-                    Object.entries(profile.personal) as Array<
-                      [keyof Profile['personal'], string]
-                    >
+                    Object.entries(profile.personal).filter(
+                      ([key]) =>
+                        !['website', 'linkedin', 'github'].includes(key),
+                    ) as Array<[keyof Profile['personal'], string]>
                   ).map(([key, value]) => (
                     <VisibilityCheckbox
                       key={key}
@@ -518,6 +520,21 @@ function StructuredResumeBuilder() {
                       }
                     />
                   ))}
+                  {profile.links.map((link) => {
+                    const site = inferContactLink(link.label, link.url)
+                    const selectionKey = `link:${link.id}`
+                    return (
+                      <VisibilityCheckbox
+                        key={link.id}
+                        nested
+                        label={`${site.icon === 'link' ? '↗' : site.label} · ${link.label || site.label}${link.url ? ` · ${link.url}` : ''}`}
+                        checked={itemIsVisible('personal', selectionKey)}
+                        onChange={(checked) =>
+                          setItemVisible('personal', selectionKey, checked)
+                        }
+                      />
+                    )
+                  })}
                 </div>
               ) : null}
             </section>

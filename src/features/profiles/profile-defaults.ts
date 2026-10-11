@@ -5,7 +5,7 @@ export function createEmptyProfile(name = 'My Profile'): Profile {
   return {
     id: crypto.randomUUID(),
     name,
-    schemaVersion: 1,
+    schemaVersion: 2,
     personal: {
       fullName: '',
       headline: '',
@@ -16,6 +16,7 @@ export function createEmptyProfile(name = 'My Profile'): Profile {
       linkedin: '',
       github: '',
     },
+    links: [],
     summary: '',
     experience: [],
     education: [],

@@ -9,6 +9,12 @@ export type PersonalInfo = {
   github: string
 }
 
+export type ContactLink = {
+  id: string
+  label: string
+  url: string
+}
+
 export type Experience = {
   id: string
   company: string
@@ -87,8 +93,9 @@ export type CustomSection = {
 export type Profile = {
   id: string
   name: string
-  schemaVersion: 1
+  schemaVersion: 2
   personal: PersonalInfo
+  links: ContactLink[]
   summary: string
   experience: Experience[]
   education: Education[]
