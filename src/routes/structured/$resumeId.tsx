@@ -9,11 +9,11 @@ import { ThemeToggle } from '#/components/theme-toggle'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
+import { inferContactLink } from '#/features/profiles/contact-links'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportResumePackage } from '#/features/resume/source-package'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
-import { inferContactLink } from '#/features/profiles/contact-links'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
@@ -513,7 +513,7 @@ function StructuredResumeBuilder() {
                     <VisibilityCheckbox
                       key={key}
                       nested
-                      label={`${key.replace(/([A-Z])/g, ' $1')}${value ? ` · ${value}` : ''}`}
+                      label={`${key.replace(/([A-Z])/g, ' $1').toUpperCase()}${value ? ` · ${value}` : ''}`}
                       checked={itemIsVisible('personal', key)}
                       onChange={(checked) =>
                         setItemVisible('personal', key, checked)

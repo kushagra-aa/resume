@@ -3,7 +3,27 @@
   margin: 0;
 }
 :root {
-  color: var(--resume-accent, #202124);
+  --resume-accent-ink: color-mix(
+    in srgb,
+    var(--resume-accent, #202124) 78%,
+    #202124 22%
+  );
+  --resume-accent-muted: color-mix(
+    in srgb,
+    var(--resume-accent, #202124) 28%,
+    #6b6b6b 72%
+  );
+  --resume-accent-border: color-mix(
+    in srgb,
+    var(--resume-accent, #202124) 32%,
+    #d8d8d8 68%
+  );
+  --resume-accent-tint: color-mix(
+    in srgb,
+    var(--resume-accent, #202124) 7%,
+    white
+  );
+  color: #262626;
   font-family: var(--resume-font-family, Georgia, serif);
   background: #fff;
   -webkit-print-color-adjust: exact;
@@ -24,7 +44,7 @@ body {
 }
 .header {
   padding-bottom: 7mm;
-  border-bottom: 1px solid #9a9a9a;
+  border-bottom: 1px solid var(--resume-accent-border);
 }
 h1 {
   margin: 0;
@@ -32,32 +52,52 @@ h1 {
   font-weight: 500;
   letter-spacing: 0.02em;
 }
+.resume a {
+  color: var(--resume-accent-ink);
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--resume-accent-ink) 55%,
+    transparent
+  );
+}
+.credential h3 a {
+  font-size: inherit;
+}
 .title {
   margin: 2mm 0;
   font-size: 17px;
-  color: #5f6368;
+  color: var(--resume-accent-ink);
 }
 .contact,
 .muted {
-  color: #6b6b6b;
+  color: var(--resume-accent-muted);
   font-size: var(--resume-font-size, 10.5pt);
 }
-.contact > span,
-.contact > a {
+.contact-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1mm 2.5mm;
+}
+.contact-details > span {
   display: inline-flex;
   align-items: center;
-  gap: 1.5mm;
-  margin-right: 2mm;
 }
-.contact-link-icon {
-  display: inline-grid;
-  place-items: center;
-  min-width: 4mm;
-  height: 4mm;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-size: 7pt;
-  font-weight: 700;
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 2mm;
+  margin-top: 1.5mm;
+}
+.links > a {
+  text-decoration: none;
+}
+.links > a:not(:last-child)::after {
+  content: '·';
+  margin-left: 2mm;
+  color: var(--resume-accent-ink);
+}
+.links > a:hover {
+  text-decoration: underline;
 }
 .summary {
   max-width: 165mm;
@@ -69,6 +109,7 @@ section {
   margin-top: var(--resume-section-spacing, 8mm);
 }
 h2 {
+  color: var(--resume-accent-ink);
   margin: 0 0 4mm;
   font-size: 12px;
   letter-spacing: 0.16em;
@@ -106,8 +147,16 @@ li {
   display: inline-block;
   margin: 0 2mm 2mm 0;
   padding: 1.5mm 2mm;
-  border: 1px solid #aaa;
+  border: 1px solid var(--resume-accent-border);
+  background: var(--resume-accent-tint);
+  color: var(--resume-accent-ink);
   font-size: 10pt;
+}
+.skill.technology {
+  display: inline-block;
+  margin: 0 2mm 2mm 0;
+  padding: 0.5mm 1mm;
+  font-size: 8pt;
 }
 @media print {
   .header,

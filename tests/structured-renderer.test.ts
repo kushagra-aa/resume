@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
@@ -174,6 +177,110 @@ describe('structured resume rendering', () => {
       template,
     )
     expect(hidden.html).not.toContain('github.com/morgan')
+  })
+
+  it('exposes safe credential and publication links and independent custom metadata', () => {
+    const profile = structuredClone(completeProfileFixture)
+    profile.customSections[0]!.items = [
+      {
+        id: 'title-only',
+        title: 'Title only',
+        subtitle: '',
+        date: '',
+        description: 'A description without optional metadata.',
+      },
+      {
+        id: 'dated',
+        title: 'Dated item',
+        subtitle: 'Organization',
+        date: '2025',
+        description: '',
+      },
+    ]
+    const data = createStructuredTemplateData(profile, makeResume())
+    const certification = (
+      data.certifications as Array<{
+        url: string
+        hasUrl: boolean
+        meta: string
+      }>
+    )[0]!
+    const publication = (
+      data.publications as Array<{
+        url: string
+        hasUrl: boolean
+        meta: string
+      }>
+    )[0]!
+    const customItems = (
+      data.customSections as Array<{
+        items: Array<{
+          hasSubtitle: boolean
+          hasDate: boolean
+          hasDescription: boolean
+        }>
+      }>
+    )[0]!.items
+
+    expect(certification).toMatchObject({
+      url: 'https://example.test/cert',
+      hasUrl: true,
+      meta: 'Cloud Org · 2024',
+    })
+    expect(publication).toMatchObject({
+      url: 'https://example.test/article',
+      hasUrl: true,
+      meta: 'Tech Journal · 2022',
+    })
+    expect(customItems).toEqual([
+      expect.objectContaining({
+        hasSubtitle: false,
+        hasDate: false,
+        hasDescription: true,
+      }),
+      expect.objectContaining({
+        hasSubtitle: true,
+        hasDate: true,
+        hasDescription: false,
+      }),
+    ])
+  })
+
+  it('renders built-in templates with safe external anchors for every linked record', () => {
+    for (const templateId of ['classic', 'modern', 'minimal']) {
+      const template = {
+        ...completeTemplateFixture,
+        id: templateId,
+        html: readFileSync(
+          resolve(process.cwd(), `public/templates/${templateId}/resume.html`),
+          'utf8',
+        ),
+        css: readFileSync(
+          resolve(process.cwd(), `public/templates/${templateId}/resume.css`),
+          'utf8',
+        ),
+      }
+      const rendered = renderStructuredResume(
+        completeProfileFixture,
+        makeResume(),
+        template,
+      )
+      const anchors = rendered.html.match(/<a\b[^>]*>/g) ?? []
+
+      expect(rendered.html).not.toContain('{{')
+      expect(rendered.html).toContain('href="https://example.test/cert"')
+      expect(rendered.html).toContain('href="https://example.test/article"')
+      expect(rendered.css).toContain('--resume-accent-ink: color-mix(')
+      expect(rendered.css).toContain('--resume-accent-border: color-mix(')
+      expect(anchors.length).toBeGreaterThanOrEqual(4)
+      expect(
+        anchors.every(
+          (anchor) =>
+            anchor.includes('target="_blank"') &&
+            anchor.includes('rel="noopener noreferrer"'),
+        ),
+      ).toBe(true)
+    }
   })
 
   it('applies safe template configuration and rejects malformed structured data', () => {

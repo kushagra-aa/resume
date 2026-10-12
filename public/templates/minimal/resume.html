@@ -3,19 +3,30 @@
     <h1>{{name}}</h1>
     <p class="title">{{title}}</p>
     {{#sectionVisibility.personal}}
-    <p class="contact">
-      {{#contactDetails}}<span>{{value}}</span>{{/contactDetails}} {{#links}}<a
-        href="{{href}}"
-        aria-label="{{label}}"
-        ><span class="contact-link-icon" aria-hidden="true">{{iconText}}</span
-        >{{label}}</a
-      >{{/links}}
-    </p>
+    <div class="contact">
+      <div class="contact-details">
+        {{#contactDetails}}<span>{{value}}</span>{{/contactDetails}}
+      </div>
+      <div class="contact-links">
+        {{#links}}<a
+          href="{{href}}"
+          aria-label="{{label}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{label}}</a
+        >{{/links}}
+      </div>
+    </div>
     {{/sectionVisibility.personal}}
   </header>
   {{#sectionVisibility.summary}}
   <p class="summary">{{summary}}</p>
-  {{/sectionVisibility.summary}} {{#sectionVisibility.experience}}
+  {{/sectionVisibility.summary}} {{#sectionVisibility.skills}}
+  <section>
+    <h2>{{sectionTitles.skills}}</h2>
+    <p>{{#skills}}{{#group}}{{/group}}{{value}} · {{/skills}}</p>
+  </section>
+  {{/sectionVisibility.skills}} {{#sectionVisibility.experience}}
   <section>
     <h2>{{sectionTitles.experience}}</h2>
     {{#experience}}
@@ -24,7 +35,7 @@
       <div class="row">
         {{#hasHeading}}
         <h3>{{heading}}</h3>
-        {{/hasHeading}} {{#hasDates}}<span>{{dates}}</span>{{/hasDates}}
+        {{/hasHeading}}
       </div>
       {{/hasHeadingOrDates}} {{#hasMeta}}
       <p class="muted">{{meta}}</p>
@@ -48,9 +59,13 @@
       {{/hasHeading}} {{#hasDescription}}
       <p>{{description}}</p>
       {{/hasDescription}} {{#hasUrl}}
-      <p><a href="{{url}}">{{meta}}</a></p>
+      <p>
+        <a href="{{url}}" target="_blank" rel="noopener noreferrer">{{meta}}</a>
+      </p>
       {{/hasUrl}} {{#hasTechnologies}}
-      <p>{{#technologies}}<span>{{value}}</span>{{/technologies}}</p>
+      <div class="project-technologies">
+        {{#technologies}}<span>{{value}}</span>{{/technologies}}
+      </div>
       {{/hasTechnologies}} {{#hasBullets}}
       <ul>
         {{#bullets}}
@@ -61,12 +76,7 @@
     </article>
     {{/projects}}
   </section>
-  {{/sectionVisibility.projects}} {{#sectionVisibility.skills}}
-  <section>
-    <h2>{{sectionTitles.skills}}</h2>
-    <p>{{#skills}}{{#group}}{{group}}: {{/group}}{{value}} · {{/skills}}</p>
-  </section>
-  {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
+  {{/sectionVisibility.projects}} {{#sectionVisibility.education}}
   <section>
     <h2>{{sectionTitles.education}}</h2>
     {{#education}}
@@ -85,7 +95,22 @@
   <section>
     <h2>{{sectionTitles.certifications}}</h2>
     {{#certifications}}
-    <p>{{display}}</p>
+    <article class="credential">
+      {{#hasName}}
+      <h3>
+        {{name}}{{#hasUrl}}
+        <a
+          href="{{url}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Visit {{name}}"
+          >↗</a
+        >{{/hasUrl}}
+      </h3>
+      {{/hasName}} {{#hasMeta}}
+      <p class="muted">{{meta}}</p>
+      {{/hasMeta}}
+    </article>
     {{/certifications}}
   </section>
   {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
@@ -109,7 +134,16 @@
     {{#publications}}
     <article>
       {{#hasHeading}}
-      <h3>{{title}}</h3>
+      <h3>
+        {{title}}{{#hasUrl}}
+        <a
+          href="{{url}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Read {{title}}"
+          >↗</a
+        >{{/hasUrl}}
+      </h3>
       {{/hasHeading}} {{#meta}}
       <p>{{meta}}</p>
       {{/meta}} {{#hasDescription}}

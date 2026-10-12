@@ -7,12 +7,19 @@
     </div>
     {{#sectionVisibility.personal}}
     <div class="contact">
-      {{#contactDetails}}
-      <div>{{value}}</div>
-      {{/contactDetails}} {{#links}}<a href="{{href}}" aria-label="{{label}}"
-        ><span class="contact-link-icon" aria-hidden="true">{{iconText}}</span
-        >{{label}}</a
-      >{{/links}}
+      <div class="contact-details">
+        {{#contactDetails}}<span>{{value}}</span>{{/contactDetails}}
+      </div>
+      <div class="contact-links">
+        {{#links}}<a
+          href="{{href}}"
+          aria-label="{{label}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><span class="contact-link-icon" aria-hidden="true">{{iconText}}</span
+          >{{label}}</a
+        >{{/links}}
+      </div>
     </div>
     {{/sectionVisibility.personal}}
   </header>
@@ -27,42 +34,98 @@
       <section>
         <h2>{{sectionTitles.skills}}</h2>
         <div class="skills">
-          {{#skills}}<span>{{#group}}{{group}}: {{/group}}{{value}}</span
-          >{{/skills}}
+          {{#skills}}<span>{{#group}}{{/group}}{{value}}</span>{{/skills}}
         </div>
       </section>
       {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
       <section>
         <h2>{{sectionTitles.education}}</h2>
         {{#education}}
-        <article>
+        <article class="aside-item">
           {{#hasHeading}}
           <h3>{{heading}}</h3>
           {{/hasHeading}} {{#hasMeta}}
-          <p>{{meta}}</p>
+          <p class="aside-meta">{{meta}}</p>
           {{/hasMeta}} {{#hasDetails}}
-          <p>{{details}}</p>
+          <p class="aside-description">{{details}}</p>
           {{/hasDetails}}
         </article>
         {{/education}}
       </section>
-      {{/sectionVisibility.education}}
+      {{/sectionVisibility.education}} {{#sectionVisibility.certifications}}
+      <section>
+        <h2>{{sectionTitles.certifications}}</h2>
+        {{#certifications}}
+        <article class="aside-item">
+          {{#hasName}}
+          <h3>
+            {{name}}{{#hasUrl}}
+            <a
+              href="{{url}}"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit {{name}}"
+              >↗</a
+            >{{/hasUrl}}
+          </h3>
+          {{/hasName}} {{#hasMeta}}
+          <p class="aside-meta">{{meta}}</p>
+          {{/hasMeta}}
+        </article>
+        {{/certifications}}
+      </section>
+      {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
+      <section>
+        <h2>{{sectionTitles.awards}}</h2>
+        {{#awards}}
+        <article class="aside-item">
+          {{#hasHeading}}
+          <h3>{{name}}</h3>
+          {{/hasHeading}} {{#meta}}
+          <p class="aside-meta">{{meta}}</p>
+          {{/meta}} {{#hasDescription}}
+          <p class="aside-description">{{description}}</p>
+          {{/hasDescription}}
+        </article>
+        {{/awards}}
+      </section>
+      {{/sectionVisibility.awards}} {{#sectionVisibility.publications}}
+      <section>
+        <h2>{{sectionTitles.publications}}</h2>
+        {{#publications}}
+        <article class="aside-item">
+          {{#hasHeading}}
+          <h3>
+            {{title}}{{#hasUrl}}
+            <a
+              href="{{url}}"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Read {{title}}"
+              >↗</a
+            >{{/hasUrl}}
+          </h3>
+          {{/hasHeading}} {{#meta}}
+          <p class="aside-meta">{{meta}}</p>
+          {{/meta}} {{#hasDescription}}
+          <p class="aside-description">{{description}}</p>
+          {{/hasDescription}}
+        </article>
+        {{/publications}}
+      </section>
+      {{/sectionVisibility.publications}}
     </aside>
-    <div>
+    <div class="main-column">
       {{#sectionVisibility.experience}}
       <section>
         <h2>{{sectionTitles.experience}}</h2>
         {{#experience}}
-        <article>
+        <article class="timeline-item">
           <div class="marker"></div>
-          <div>
-            {{#hasHeadingOrDates}}
-            <div class="row">
-              {{#hasHeading}}
-              <h3>{{heading}}</h3>
-              {{/hasHeading}} {{#hasDates}}<span>{{dates}}</span>{{/hasDates}}
-            </div>
-            {{/hasHeadingOrDates}} {{#hasMeta}}
+          <div class="timeline-content">
+            {{#hasHeading}}
+            <h3>{{heading}}</h3>
+            {{/hasHeading}} {{#hasMeta}}
             <p class="company">{{meta}}</p>
             {{/hasMeta}} {{#hasBullets}}
             <ul>
@@ -85,9 +148,17 @@
           {{/hasHeading}} {{#hasDescription}}
           <p>{{description}}</p>
           {{/hasDescription}} {{#hasUrl}}
-          <p><a href="{{url}}">{{meta}}</a></p>
+          <p>
+            <a href="{{url}}" target="_blank" rel="noopener noreferrer"
+              >{{meta}}</a
+            >
+          </p>
           {{/hasUrl}} {{#hasTechnologies}}
-          <p>{{#technologies}}<span>{{value}}</span>{{/technologies}}</p>
+          <ul class="technologies">
+            {{#technologies}}
+            <li>{{value}}</li>
+            {{/technologies}}
+          </ul>
           {{/hasTechnologies}} {{#hasBullets}}
           <ul>
             {{#bullets}}
@@ -98,59 +169,25 @@
         </article>
         {{/projects}}
       </section>
-      {{/sectionVisibility.projects}} {{#sectionVisibility.certifications}}
-      <section>
-        <h2>{{sectionTitles.certifications}}</h2>
-        {{#certifications}}
-        <p>{{display}}</p>
-        {{/certifications}}
-      </section>
-      {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
-      <section>
-        <h2>{{sectionTitles.awards}}</h2>
-        {{#awards}}
-        <article>
-          {{#hasHeading}}
-          <h3>{{name}}</h3>
-          {{/hasHeading}} {{#meta}}
-          <p>{{meta}}</p>
-          {{/meta}} {{#hasDescription}}
-          <p>{{description}}</p>
-          {{/hasDescription}}
-        </article>
-        {{/awards}}
-      </section>
-      {{/sectionVisibility.awards}} {{#sectionVisibility.publications}}
-      <section>
-        <h2>{{sectionTitles.publications}}</h2>
-        {{#publications}}
-        <article>
-          {{#hasHeading}}
-          <h3>{{title}}</h3>
-          {{/hasHeading}} {{#meta}}
-          <p>{{meta}}</p>
-          {{/meta}} {{#hasDescription}}
-          <p>{{description}}</p>
-          {{/hasDescription}}
-        </article>
-        {{/publications}}
-      </section>
-      {{/sectionVisibility.publications}}
+      {{/sectionVisibility.projects}}
       {{#sectionVisibility.customSections}}{{#customSections}}
-      <section>
+      <section class="custom-section">
         {{#hasTitle}}
         <h2>{{title}}</h2>
-        {{/hasTitle}} {{#items}}
-        <article>
-          {{#hasTitle}}
-          <h3>{{title}}</h3>
-          {{/hasTitle}} {{#hasMeta}}
-          <p>{{meta}}</p>
-          {{/hasMeta}} {{#hasDescription}}
-          <p>{{description}}</p>
-          {{/hasDescription}}
-        </article>
-        {{/items}}
+        {{/hasTitle}}
+        <div class="custom-items">
+          {{#items}}
+          <article class="custom-item">
+            {{#hasTitle}}
+            <h3>{{title}}</h3>
+            {{/hasTitle}} {{#hasMeta}}
+            <p class="custom-meta">{{meta}}</p>
+            {{/hasMeta}} {{#hasDescription}}
+            <p class="custom-description">{{description}}</p>
+            {{/hasDescription}}
+          </article>
+          {{/items}}
+        </div>
       </section>
       {{/customSections}}{{/sectionVisibility.customSections}}
     </div>

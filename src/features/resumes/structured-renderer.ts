@@ -211,6 +211,10 @@ export function createStructuredTemplateData(
         .map((item) => ({
           ...item,
           hasName: Boolean(item.name.trim()),
+          url: safeContactHref(item.url),
+          hasUrl: Boolean(safeContactHref(item.url)),
+          meta: joinText(item.issuer, item.date),
+          hasMeta: hasText(item.issuer, item.date),
           display: joinText(item.name, item.issuer, item.date, item.url),
         }))
     : []
@@ -230,7 +234,9 @@ export function createStructuredTemplateData(
         .map((item) => ({
           ...item,
           hasHeading: Boolean(item.title.trim()),
-          meta: joinText(item.publisher, item.date, item.url),
+          url: safeContactHref(item.url),
+          hasUrl: Boolean(safeContactHref(item.url)),
+          meta: joinText(item.publisher, item.date),
           hasDescription: Boolean(item.description.trim()),
         }))
     : []
@@ -249,6 +255,8 @@ export function createStructuredTemplateData(
             .map((item) => ({
               ...item,
               hasTitle: Boolean(item.title.trim()),
+              hasSubtitle: Boolean(item.subtitle.trim()),
+              hasDate: Boolean(item.date.trim()),
               meta: joinText(item.subtitle, item.date),
               hasMeta: hasText(item.subtitle, item.date),
               hasDescription: Boolean(item.description.trim()),
@@ -285,9 +293,9 @@ export function createStructuredTemplateData(
     github: personalValue('github'),
     links,
     contactDetails: [
+      personalValue('location'),
       personalValue('email'),
       personalValue('phone'),
-      personalValue('location'),
     ]
       .filter((value) => value.trim())
       .map((value) => ({ value })),
