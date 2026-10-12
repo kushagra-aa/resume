@@ -5,10 +5,13 @@ import { AppHeader } from '#/components/app-header'
 import { BackButton } from '#/components/back-button'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
+import {
+  estimatePrintPageCount,
+  isPrintPageMargins,
+  type PrintPageMargins,
+} from '#/features/resume/print-pagination'
 import { loadStructuredResumeDocument } from '#/features/resumes/structured-renderer'
 import type { ResumeDocument } from '#/models/resume'
-
-const A4_PAGE_HEIGHT_PX = 1123
 
 export const Route = createFileRoute('/print/$resumeId')({
   component: PrintRoute,
@@ -21,15 +24,18 @@ function PrintRoute() {
   const [resume, setResume] = useState<ResumeDocument | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [frameLoaded, setFrameLoaded] = useState(false)
-  const [frameHeight, setFrameHeight] = useState<number | null>(null)
-  const pageCount = Math.max(
-    1,
-    Math.ceil((frameHeight ?? A4_PAGE_HEIGHT_PX) / A4_PAGE_HEIGHT_PX),
+  const [printLayout, setPrintLayout] = useState<{
+    contentHeight: number
+    margins: PrintPageMargins
+  } | null>(null)
+  const pageCount = estimatePrintPageCount(
+    printLayout?.contentHeight ?? null,
+    printLayout?.margins ?? null,
   )
 
   useEffect(() => {
     setFrameLoaded(false)
-    setFrameHeight(null)
+    setPrintLayout(null)
   }, [resumeId])
 
   useEffect(() => {
@@ -49,14 +55,22 @@ function PrintRoute() {
     const onPreviewMessage = (event: MessageEvent<unknown>) => {
       if (event.source !== frameRef.current?.contentWindow) return
       if (!event.data || typeof event.data !== 'object') return
-      const data = event.data as { type?: unknown; height?: unknown }
+      const data = event.data as {
+        type?: unknown
+        contentHeight?: unknown
+        margins?: unknown
+      }
       if (
         data.type !== 'resume-preview-height' ||
-        typeof data.height !== 'number' ||
-        !Number.isFinite(data.height)
+        typeof data.contentHeight !== 'number' ||
+        !Number.isFinite(data.contentHeight) ||
+        !isPrintPageMargins(data.margins)
       )
         return
-      setFrameHeight(Math.max(A4_PAGE_HEIGHT_PX, Math.min(data.height, 20000)))
+      setPrintLayout({
+        contentHeight: Math.min(data.contentHeight, 20000),
+        margins: data.margins,
+      })
     }
     window.addEventListener('message', onPreviewMessage)
     return () => window.removeEventListener('message', onPreviewMessage)
@@ -66,14 +80,14 @@ function PrintRoute() {
     if (
       !resume ||
       !frameLoaded ||
-      frameHeight === null ||
+      printLayout === null ||
       window.sessionStorage.getItem('resume:print-on-load') !== resume.id
     )
       return
     window.sessionStorage.removeItem('resume:print-on-load')
     const timeout = window.setTimeout(() => printResume(), 150)
     return () => window.clearTimeout(timeout)
-  }, [frameHeight, frameLoaded, resume])
+  }, [printLayout, frameLoaded, resume])
 
   function printResume() {
     const frameWindow = frameRef.current?.contentWindow

@@ -284,8 +284,7 @@ li {
 }
 @media print {
   header,
-  article,
-  section {
+  article {
     break-inside: avoid;
   }
 }
