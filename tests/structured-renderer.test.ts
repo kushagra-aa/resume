@@ -192,6 +192,28 @@ describe('structured resume rendering', () => {
     expect(hidden.html).not.toContain('github.com/morgan')
   })
 
+  it('renders selectable Lucide link SVGs and respects the resume icon toggle', () => {
+    const profile = structuredClone(completeProfileFixture)
+    const resume = makeResume()
+    profile.links[0]!.icon = 'website'
+    const template = {
+      ...completeTemplateFixture,
+      html: '{{#links}}<a href="{{href}}">{{{iconSvg}}}{{label}}</a>{{/links}}',
+    }
+
+    const withIcons = renderStructuredResume(profile, resume, template)
+    expect(withIcons.html).toContain('<svg')
+    expect(withIcons.html).toContain('aria-hidden="true"')
+    expect(createStructuredTemplateData(profile, resume).links).toEqual(
+      expect.arrayContaining([expect.objectContaining({ icon: 'website' })]),
+    )
+
+    resume.templateConfiguration.showLinkIcons = false
+    const withoutIcons = renderStructuredResume(profile, resume, template)
+    expect(withoutIcons.html).not.toContain('<svg')
+    expect(withoutIcons.html).toContain('GitHub')
+  })
+
   it('exposes safe credential and publication links and independent custom metadata', () => {
     const profile = structuredClone(completeProfileFixture)
     profile.customSections[0]!.items = [

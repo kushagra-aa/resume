@@ -86,8 +86,21 @@ h1 {
   gap: 0 2mm;
 }
 .contact-links > a {
+  align-items: center;
+  display: inline-flex;
+  gap: 1mm;
   text-decoration: none;
   font-size: 10pt;
+}
+.contact-link-icon {
+  display: inline-flex;
+  align-items: center;
+  color: currentColor;
+}
+.contact-link-icon svg {
+  display: block;
+  width: 3.5mm;
+  height: 3.5mm;
 }
 .contact-links > a:not(:last-child)::after {
   content: '·';

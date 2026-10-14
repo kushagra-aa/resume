@@ -647,7 +647,8 @@ pre code {
 }
 
 .profile-field input,
-.profile-field textarea {
+.profile-field textarea,
+.profile-field select {
   background: var(--paper);
   border: 1px solid rgba(23, 58, 64, 0.18);
   border-radius: 0.5rem;
@@ -664,7 +665,8 @@ pre code {
 }
 
 .profile-field input:focus-visible,
-.profile-field textarea:focus-visible {
+.profile-field textarea:focus-visible,
+.profile-field select:focus-visible {
   border-color: var(--coral);
   outline: 2px solid rgba(225, 112, 86, 0.3);
   outline-offset: 1px;
@@ -847,6 +849,10 @@ pre code {
   color: var(--sea-ink);
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.profile-link-icon-choice {
+  max-width: 18rem;
 }
 
 .profile-link-actions {

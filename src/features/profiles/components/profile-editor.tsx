@@ -2,19 +2,10 @@ import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowDown,
   ArrowUp,
-  AtSign,
-  BookOpen,
-  BriefcaseBusiness,
-  Camera,
   ChevronDown,
-  CirclePlay,
-  Code2,
-  Link as LinkIcon,
-  PanelsTopLeft,
   Plus,
   Save,
   Trash2,
-  UsersRound,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -25,6 +16,9 @@ import { BackButton } from '#/components/back-button'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import {
+  contactIconComponent,
+  contactIconForLink,
+  contactLinkIconOptions,
   inferContactLink,
   normalizeContactUrl,
 } from '#/features/profiles/contact-links'
@@ -62,19 +56,18 @@ const personalInputTypes: Partial<Record<keyof Profile['personal'], string>> = {
   phone: 'tel',
 }
 
-function ContactIcon({ label, url }: Pick<ContactLink, 'label' | 'url'>) {
-  const icon = inferContactLink(label, url).icon
-  const icons: Record<string, typeof LinkIcon> = {
-    github: Code2,
-    linkedin: BriefcaseBusiness,
-    youtube: CirclePlay,
-    instagram: Camera,
-    facebook: UsersRound,
-    x: AtSign,
-    medium: BookOpen,
-    behance: PanelsTopLeft,
-  }
-  const Icon = icons[icon] ?? LinkIcon
+function ContactIcon({
+  label,
+  url,
+  icon: selectedIcon,
+}: Pick<ContactLink, 'label' | 'url' | 'icon'>) {
+  const icon = contactIconForLink({
+    id: '',
+    label,
+    url,
+    icon: selectedIcon,
+  })
+  const Icon = contactIconComponent(icon)
   return <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
 }
 
@@ -90,11 +83,17 @@ function ContactLinkEditor({
   onMove: (direction: -1 | 1) => void
 }) {
   const detected = inferContactLink(link.label, link.url)
+  const selectedIconLabel = link.icon
+    ? contactLinkIconOptions.find((option) => option.value === link.icon)?.label
+    : detected.label
   const hasContent = Boolean(link.label.trim() || link.url.trim())
   return (
     <div className="profile-link-item">
-      <span className="profile-link-icon" aria-label={`${detected.label} icon`}>
-        <ContactIcon label={link.label} url={link.url} />
+      <span
+        className="profile-link-icon"
+        aria-label={`${selectedIconLabel ?? 'Link'} icon`}
+      >
+        <ContactIcon label={link.label} url={link.url} icon={link.icon} />
       </span>
       <div className="profile-form-grid">
         <Field
@@ -117,6 +116,28 @@ function ContactLinkEditor({
               onChange({ ...link, url: normalized, label })
           }}
         />
+        <label className="profile-field profile-link-icon-choice">
+          <span>Icon</span>
+          <select
+            value={link.icon ?? 'auto'}
+            onChange={(event) =>
+              onChange({
+                ...link,
+                icon:
+                  event.target.value === 'auto'
+                    ? undefined
+                    : (event.target.value as ContactLink['icon']),
+              })
+            }
+          >
+            <option value="auto">Auto-detect</option>
+            {contactLinkIconOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <div className="profile-link-actions">
         <button

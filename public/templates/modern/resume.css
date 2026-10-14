@@ -105,14 +105,14 @@ h1 {
   text-decoration: underline;
 }
 .contact-link-icon {
-  display: inline-grid;
-  place-items: center;
-  min-width: 4mm;
+  align-items: center;
+  display: inline-flex;
+  color: currentColor;
+}
+.contact-link-icon svg {
+  display: block;
+  width: 4mm;
   height: 4mm;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-size: 7pt;
-  font-weight: 700;
 }
 .grid {
   display: grid;

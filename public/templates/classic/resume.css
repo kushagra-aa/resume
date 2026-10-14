@@ -89,7 +89,20 @@ h1 {
   margin-top: 1.5mm;
 }
 .links > a {
+  align-items: center;
+  display: inline-flex;
+  gap: 1mm;
   text-decoration: none;
+}
+.contact-link-icon {
+  display: inline-flex;
+  align-items: center;
+  color: currentColor;
+}
+.contact-link-icon svg {
+  display: block;
+  width: 3.5mm;
+  height: 3.5mm;
 }
 .links > a:not(:last-child)::after {
   content: '·';

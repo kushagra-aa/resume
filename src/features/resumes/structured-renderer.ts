@@ -109,7 +109,12 @@ export function createStructuredTemplateData(
   }
   const links = orderItems(profile.links, 'personal', resume)
     .filter((link) => selected('personal', `link:${link.id}`))
-    .map(linkForTemplate)
+    .map((link) =>
+      linkForTemplate(
+        link,
+        resume.templateConfiguration.showLinkIcons !== false,
+      ),
+    )
     .filter((link) => link.href)
   const experience = selected('experience')
     ? orderItems(profile.experience, 'experience', resume)

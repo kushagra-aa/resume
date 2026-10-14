@@ -401,12 +401,18 @@ function StructuredResumeBuilder() {
         ...current.customization,
         sectionOrder: defaultSectionOrderForTemplate(next.id),
       },
-      templateConfiguration: Object.fromEntries(
-        next.controls.map((control) => [control.key, control.defaultValue]),
-      ),
+      templateConfiguration: {
+        ...Object.fromEntries(
+          next.controls.map((control) => [control.key, control.defaultValue]),
+        ),
+        showLinkIcons: current.templateConfiguration.showLinkIcons !== false,
+      },
     }))
   }
-  function setTemplateConfiguration(key: string, value: string | number) {
+  function setTemplateConfiguration(
+    key: string,
+    value: string | number | boolean,
+  ) {
     updateResume((current) => ({
       ...current,
       templateConfiguration: {
@@ -809,6 +815,19 @@ function StructuredResumeBuilder() {
 
           <div className="builder-section-list">
             <h2>Customize appearance</h2>
+            <label className="builder-checkbox">
+              <input
+                type="checkbox"
+                checked={resume.templateConfiguration.showLinkIcons !== false}
+                onChange={(event) =>
+                  setTemplateConfiguration(
+                    'showLinkIcons',
+                    event.target.checked,
+                  )
+                }
+              />
+              <span>Show icons beside resume links</span>
+            </label>
             {template.controls.length ? (
               template.controls.map((control) => {
                 const value =

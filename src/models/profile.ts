@@ -13,7 +13,19 @@ export type ContactLink = {
   id: string
   label: string
   url: string
+  icon?: ContactLinkIcon
 }
+
+export type ContactLinkIcon =
+  | 'website'
+  | 'email'
+  | 'code'
+  | 'professional'
+  | 'video'
+  | 'social'
+  | 'reading'
+  | 'community'
+  | 'link'
 
 export type Experience = {
   id: string

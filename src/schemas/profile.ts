@@ -27,6 +27,19 @@ const contactLinkSchema = z.object({
   id,
   label: text,
   url: text,
+  icon: z
+    .enum([
+      'website',
+      'email',
+      'code',
+      'professional',
+      'video',
+      'social',
+      'reading',
+      'community',
+      'link',
+    ])
+    .optional(),
 })
 
 const experienceSchema = z.object({

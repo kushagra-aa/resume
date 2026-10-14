@@ -112,7 +112,7 @@ export function createStructuredResume(
         ),
       },
     },
-    templateConfiguration: {},
+    templateConfiguration: { showLinkIcons: true },
     customization: {
       sectionTitles: {},
       sectionOrder: defaultSectionOrderForTemplate(templateId),
