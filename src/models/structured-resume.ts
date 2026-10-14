@@ -21,6 +21,8 @@ export type ResumeSelection = {
 
 export type ResumeCustomization = {
   sectionTitles: Partial<Record<ProfileSectionKey, string>>
+  sectionOrder?: ProfileSectionKey[]
+  itemOrder?: Partial<Record<ProfileSectionKey, string[]>>
 }
 
 export type StructuredResume = {

@@ -84,6 +84,19 @@ describe('structured resume rendering', () => {
     expect(rendered.html).toContain('React')
   })
 
+  it('renders resume-specific section heading customization', () => {
+    const resume = makeResume()
+    resume.customization.sectionTitles.experience = 'Selected work'
+    const rendered = renderStructuredResume(
+      completeProfileFixture,
+      resume,
+      completeTemplateFixture,
+    )
+
+    expect(rendered.html).toContain('<h2>Selected work</h2>')
+    expect(resume.customization.sectionTitles.experience).toBe('Selected work')
+  })
+
   it('hides empty optional sections and resolves missing content to empty values', () => {
     const profile = structuredClone(completeProfileFixture)
     profile.awards = []
@@ -248,6 +261,8 @@ describe('structured resume rendering', () => {
 
   it('renders built-in templates with safe external anchors for every linked record', () => {
     for (const templateId of ['classic', 'modern', 'minimal']) {
+      const resume = makeResume()
+      resume.templateId = templateId
       const template = {
         ...completeTemplateFixture,
         id: templateId,
@@ -262,7 +277,7 @@ describe('structured resume rendering', () => {
       }
       const rendered = renderStructuredResume(
         completeProfileFixture,
-        makeResume(),
+        resume,
         template,
       )
       const anchors = rendered.html.match(/<a\b[^>]*>/g) ?? []
@@ -272,6 +287,8 @@ describe('structured resume rendering', () => {
       expect(rendered.html).toContain('href="https://example.test/article"')
       expect(rendered.css).toContain('--resume-accent-ink: color-mix(')
       expect(rendered.css).toContain('--resume-accent-border: color-mix(')
+      expect(rendered.html).toContain('data-resume-section=')
+      expect(rendered.css).toContain('--resume-order-experience:')
       expect(anchors.length).toBeGreaterThanOrEqual(4)
       expect(
         anchors.every(
@@ -281,6 +298,29 @@ describe('structured resume rendering', () => {
         ),
       ).toBe(true)
     }
+  })
+
+  it('renders reordered profile items in their resume-specific order', () => {
+    const profile = structuredClone(completeProfileFixture)
+    const secondExperience = {
+      ...profile.experience[0]!,
+      id: 'experience-second',
+      company: 'Second Company',
+      role: 'Second Role',
+    }
+    profile.experience.push(secondExperience)
+    const resume = makeResume()
+    resume.customization.itemOrder = {
+      experience: ['experience-second', profile.experience[0]!.id],
+    }
+
+    const data = createStructuredTemplateData(profile, resume)
+    const experience = data.experience as Array<{ company: string }>
+
+    expect(experience.map((item) => item.company)).toEqual([
+      'Second Company',
+      profile.experience[0]!.company,
+    ])
   })
 
   it('applies safe template configuration and rejects malformed structured data', () => {

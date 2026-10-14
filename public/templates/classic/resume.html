@@ -22,7 +22,7 @@
     {{/sectionVisibility.summary}}
   </header>
   {{#sectionVisibility.skills}}
-  <section>
+  <section data-resume-section="skills">
     <h2>{{sectionTitles.skills}}</h2>
     <p>
       {{#skills}}<span class="skill">{{#group}}{{/group}}{{value}}</span>
@@ -30,7 +30,7 @@
     </p>
   </section>
   {{/sectionVisibility.skills}} {{#sectionVisibility.experience}}
-  <section>
+  <section data-resume-section="experience">
     <h2>{{sectionTitles.experience}}</h2>
     {{#experience}}
     <article>
@@ -53,7 +53,7 @@
     {{/experience}}
   </section>
   {{/sectionVisibility.experience}} {{#sectionVisibility.projects}}
-  <section>
+  <section data-resume-section="projects">
     <h2>{{sectionTitles.projects}}</h2>
     {{#projects}}
     <article>
@@ -81,7 +81,7 @@
     {{/projects}}
   </section>
   {{/sectionVisibility.projects}} {{#sectionVisibility.education}}
-  <section>
+  <section data-resume-section="education">
     <h2>{{sectionTitles.education}}</h2>
     {{#education}}
     <article>
@@ -96,7 +96,7 @@
     {{/education}}
   </section>
   {{/sectionVisibility.education}} {{#sectionVisibility.certifications}}
-  <section>
+  <section data-resume-section="certifications">
     <h2>{{sectionTitles.certifications}}</h2>
     {{#certifications}}
     <article class="credential">
@@ -118,7 +118,7 @@
     {{/certifications}}
   </section>
   {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
-  <section>
+  <section data-resume-section="awards">
     <h2>{{sectionTitles.awards}}</h2>
     {{#awards}}
     <article>
@@ -133,7 +133,7 @@
     {{/awards}}
   </section>
   {{/sectionVisibility.awards}} {{#sectionVisibility.publications}}
-  <section>
+  <section data-resume-section="publications">
     <h2>{{sectionTitles.publications}}</h2>
     {{#publications}}
     <article>
@@ -158,7 +158,7 @@
   </section>
   {{/sectionVisibility.publications}}
   {{#sectionVisibility.customSections}}{{#customSections}}
-  <section>
+  <section data-resume-section="customSections">
     {{#hasTitle}}
     <h2>{{title}}</h2>
     {{/hasTitle}} {{#items}}

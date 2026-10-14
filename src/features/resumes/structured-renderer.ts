@@ -65,6 +65,24 @@ function formatDate(start: string, end: string, current = false) {
   return [start, current ? 'Present' : end].filter(Boolean).join(' – ')
 }
 
+function orderItems<T extends { id: string }>(
+  items: T[],
+  section: ProfileSectionKey,
+  resume: StructuredResume,
+) {
+  const order = resume.customization.itemOrder?.[section]
+  if (!order?.length) return items
+  const rank = new Map(order.map((id, index) => [id, index]))
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort(
+      (left, right) =>
+        (rank.get(left.item.id) ?? order.length + left.index) -
+        (rank.get(right.item.id) ?? order.length + right.index),
+    )
+    .map(({ item }) => item)
+}
+
 export function createStructuredTemplateData(
   profile: Profile,
   resume: StructuredResume,
@@ -89,12 +107,12 @@ export function createStructuredTemplateData(
     }
     return profile.personal[key]
   }
-  const links = profile.links
+  const links = orderItems(profile.links, 'personal', resume)
     .filter((link) => selected('personal', `link:${link.id}`))
     .map(linkForTemplate)
     .filter((link) => link.href)
   const experience = selected('experience')
-    ? profile.experience
+    ? orderItems(profile.experience, 'experience', resume)
         .filter((item) => selected('experience', item.id))
         .map((item) => ({
           ...item,
@@ -129,7 +147,7 @@ export function createStructuredTemplateData(
         )
     : []
   const education = selected('education')
-    ? profile.education
+    ? orderItems(profile.education, 'education', resume)
         .filter((item) => selected('education', item.id))
         .map((item) => ({
           ...item,
@@ -158,7 +176,7 @@ export function createStructuredTemplateData(
         )
     : []
   const skills = selected('skills')
-    ? profile.skills
+    ? orderItems(profile.skills, 'skills', resume)
         .filter((group) => selected('skills', group.id))
         .flatMap((group) =>
           group.skills.flatMap((value, index) =>
@@ -169,7 +187,7 @@ export function createStructuredTemplateData(
         )
     : []
   const projects = selected('projects')
-    ? profile.projects
+    ? orderItems(profile.projects, 'projects', resume)
         .filter((item) => selected('projects', item.id))
         .map((item) => ({
           ...item,
@@ -204,7 +222,7 @@ export function createStructuredTemplateData(
         )
     : []
   const certifications = selected('certifications')
-    ? profile.certifications
+    ? orderItems(profile.certifications, 'certifications', resume)
         .filter(
           (item) => selected('certifications', item.id) && hasAnyText(item),
         )
@@ -219,7 +237,7 @@ export function createStructuredTemplateData(
         }))
     : []
   const awards = selected('awards')
-    ? profile.awards
+    ? orderItems(profile.awards, 'awards', resume)
         .filter((item) => selected('awards', item.id) && hasAnyText(item))
         .map((item) => ({
           ...item,
@@ -229,7 +247,7 @@ export function createStructuredTemplateData(
         }))
     : []
   const publications = selected('publications')
-    ? profile.publications
+    ? orderItems(profile.publications, 'publications', resume)
         .filter((item) => selected('publications', item.id) && hasAnyText(item))
         .map((item) => ({
           ...item,
@@ -241,7 +259,7 @@ export function createStructuredTemplateData(
         }))
     : []
   const customSections = selected('customSections')
-    ? profile.customSections
+    ? orderItems(profile.customSections, 'customSections', resume)
         .filter((section) => selected('customSections', section.id))
         .map((section) => ({
           ...section,
@@ -345,6 +363,7 @@ function applyTemplateConfiguration(
   css: string,
   configuration: Record<string, string | number | boolean>,
   template: ResumeTemplate,
+  sectionOrder?: ProfileSectionKey[],
 ) {
   const declarations = template.controls.flatMap((control) => {
     const value = configuration[control.key] ?? control.defaultValue
@@ -359,9 +378,27 @@ function applyTemplateConfiguration(
             value <= (control.max ?? 100)
     return valid ? [`${control.variable}: ${value}${control.unit ?? ''};`] : []
   })
-  return declarations.length
-    ? `:root { ${declarations.join(' ')} }\n${css}`
-    : css
+  const supportsSectionOrder = Boolean(
+    sectionOrder?.length && template.html.includes('data-resume-section='),
+  )
+  const orderDeclarations = supportsSectionOrder
+    ? sectionOrder?.map(
+        (section, index) => `--resume-order-${section}: ${index};`,
+      )
+    : []
+  const orderSelectors = supportsSectionOrder
+    ? sectionOrder
+        ?.map(
+          (section) =>
+            `.resume [data-resume-section="${section}"]{order:var(--resume-order-${section},0)}`,
+        )
+        .join('\n')
+    : ''
+  const layoutRules = supportsSectionOrder
+    ? '.resume{display:flex;flex-direction:column}.resume .grid aside,.resume .grid .main-column{display:flex;flex-direction:column}'
+    : ''
+  const variables = [...declarations, ...(orderDeclarations ?? [])]
+  return `${variables.length ? `:root { ${variables.join(' ')} }\n` : ''}${layoutRules}\n${orderSelectors ?? ''}\n${css}`
 }
 
 export function renderStructuredResume(
@@ -378,6 +415,7 @@ export function renderStructuredResume(
       template.css,
       resume.templateConfiguration,
       template,
+      resume.customization.sectionOrder,
     ),
     createdAt: resume.createdAt,
     updatedAt: resume.updatedAt,

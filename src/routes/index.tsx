@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowRightIcon,
   Copy,
+  Download,
   EllipsisVertical,
   FilePlus,
   Pencil,
@@ -38,7 +39,12 @@ import {
 } from '#/features/templates/custom-template-service'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { createEmptyProfile } from '#/features/profiles/profile-defaults'
+import {
+  exportProfilePackage,
+  importProfilePackage,
+} from '#/features/profiles/profile-package'
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
+import { createResumeCopyName } from '#/features/resume/duplicate-name'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import type { ResumeTemplate } from '#/features/templates/template-types'
 import type { CustomTemplate } from '#/features/templates/template-types'
@@ -70,10 +76,12 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [powerModeCreate, setPowerModeCreate] = useState(false)
   const [templates, setTemplates] = useState<ResumeTemplate[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
   const templateImportInputRef = useRef<HTMLInputElement>(null)
+  const profileImportInputRef = useRef<HTMLInputElement>(null)
   const [renameTarget, setRenameTarget] = useState<ResumeDocument | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [renameError, setRenameError] = useState<string | null>(null)
@@ -151,6 +159,7 @@ function Dashboard() {
   }, [openMenuId])
 
   async function openCreateDialog() {
+    setPowerModeCreate(false)
     setShowCreateDialog(true)
     if (templates.length || templatesLoading) return
     setTemplatesLoading(true)
@@ -216,7 +225,13 @@ function Dashboard() {
 
   async function duplicateStructuredResume(resume: StructuredResume) {
     try {
-      const duplicate = await structuredResumeRepository.duplicate(resume)
+      const duplicate = await structuredResumeRepository.duplicate(
+        resume,
+        createResumeCopyName(resume.name, [
+          ...documents.map((item) => item.name),
+          ...structuredResumes.map((item) => item.name),
+        ]),
+      )
       setStructuredResumes((current) => [duplicate, ...current])
     } catch {
       setError('The resume could not be duplicated.')
@@ -436,7 +451,13 @@ function Dashboard() {
 
   async function duplicateResume(document: ResumeDocument) {
     try {
-      const duplicate = await resumeRepository.duplicate(document)
+      const duplicate = await resumeRepository.duplicate(
+        document,
+        createResumeCopyName(document.name, [
+          ...documents.map((item) => item.name),
+          ...structuredResumes.map((item) => item.name),
+        ]),
+      )
       setDocuments((current) => sortByModifiedTime([...current, duplicate]))
     } catch {
       setError('The resume could not be duplicated.')
@@ -478,6 +499,34 @@ function Dashboard() {
     } catch {
       setError('The profile could not be duplicated.')
     }
+  }
+
+  async function importProfile(file: File) {
+    try {
+      const imported = await importProfilePackage(file)
+      await profileRepository.create(imported)
+      setProfiles((current) => [imported, ...current])
+      setActiveTab('profiles')
+    } catch (importError) {
+      setError(
+        importError instanceof Error
+          ? importError.message
+          : 'The profile package could not be imported.',
+      )
+    }
+  }
+
+  function downloadProfile(profile: Profile) {
+    const url = URL.createObjectURL(
+      new Blob([exportProfilePackage(profile)], {
+        type: 'application/json;charset=utf-8',
+      }),
+    )
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${profile.name.trim().replace(/\s+/g, '-').toLowerCase()}.resume-profile.json`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   async function deleteProfile() {
@@ -564,12 +613,32 @@ function Dashboard() {
             </button>
           ) : null}
           {activeTab === 'profiles' ? (
-            <button
-              className="button button-primary dashboard-tab-action"
-              onClick={() => void createProfile()}
-            >
-              <UserRound size={15} aria-hidden="true" /> New profile
-            </button>
+            <>
+              <input
+                ref={profileImportInputRef}
+                className="sr-only"
+                type="file"
+                accept=".json,application/json"
+                aria-label="Import profile JSON"
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ''
+                  if (file) void importProfile(file)
+                }}
+              />
+              <button
+                className="button button-secondary dashboard-tab-action"
+                onClick={() => profileImportInputRef.current?.click()}
+              >
+                <Upload size={15} aria-hidden="true" /> Import profile
+              </button>
+              <button
+                className="button button-primary dashboard-tab-action"
+                onClick={() => void createProfile()}
+              >
+                <UserRound size={15} aria-hidden="true" /> New profile
+              </button>
+            </>
           ) : null}
           {activeTab === 'templates' ? (
             <>
@@ -659,6 +728,12 @@ function Dashboard() {
                       onClick={() => void duplicateProfile(profile)}
                     >
                       Duplicate
+                    </button>
+                    <button
+                      className="button button-ghost"
+                      onClick={() => downloadProfile(profile)}
+                    >
+                      <Download size={14} aria-hidden="true" /> Export JSON
                     </button>
                     <button
                       className="button button-ghost profile-danger-action"
@@ -1114,37 +1189,81 @@ function Dashboard() {
 
       <AppDialog
         open={showCreateDialog}
-        title="Choose a starting point"
-        description="New resume"
-        onClose={() => setShowCreateDialog(false)}
+        title={
+          powerModeCreate ? 'Create in Power Mode' : 'Choose how to create'
+        }
+        description={
+          powerModeCreate
+            ? 'Choose a starting document for direct HTML/CSS editing.'
+            : 'Pick the editing experience that suits this resume.'
+        }
+        onClose={() => {
+          setShowCreateDialog(false)
+          setPowerModeCreate(false)
+        }}
       >
-        <button
-          className="template-option"
-          onClick={() => void createBlankResume()}
-        >
-          <strong>Blank document</strong>
-          <span>Start with empty HTML and CSS.</span>
-        </button>
-        <button
-          className="template-option"
-          onClick={() => void createStarterResume()}
-        >
-          <strong>Starter resume</strong>
-          <span>Start with editable sample resume content.</span>
-        </button>
-        {templatesLoading ? (
-          <p className="dashboard-message">Loading templates…</p>
-        ) : (
-          templates.map((template) => (
+        {!powerModeCreate ? (
+          <>
             <button
               className="template-option"
-              key={template.id}
-              onClick={() => void createFromTemplate(template)}
+              onClick={() => {
+                setShowCreateDialog(false)
+                void openStructuredCreateDialog()
+              }}
             >
-              <strong>{template.name}</strong>
-              <span>{template.description}</span>
+              <strong>Resume Builder</strong>
+              <span>
+                Use a profile, choose a template, and customize your resume
+                visually.
+              </span>
             </button>
-          ))
+            <button
+              className="template-option"
+              onClick={() => setPowerModeCreate(true)}
+            >
+              <strong>Power Mode</strong>
+              <span>
+                Create or customize a resume directly with HTML and CSS.
+              </span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="button button-ghost create-mode-back"
+              onClick={() => setPowerModeCreate(false)}
+            >
+              ← Back to editing mode
+            </button>
+            <button
+              className="template-option"
+              onClick={() => void createBlankResume()}
+            >
+              <strong>Blank document</strong>
+              <span>Start with empty HTML and CSS.</span>
+            </button>
+            <button
+              className="template-option"
+              onClick={() => void createStarterResume()}
+            >
+              <strong>Starter resume</strong>
+              <span>Start with editable sample resume content.</span>
+            </button>
+            {templatesLoading ? (
+              <p className="dashboard-message">Loading templates…</p>
+            ) : (
+              templates.map((template) => (
+                <button
+                  className="template-option"
+                  key={template.id}
+                  onClick={() => void createFromTemplate(template)}
+                >
+                  <strong>{template.name}</strong>
+                  <span>{template.description}</span>
+                </button>
+              ))
+            )}
+          </>
         )}
       </AppDialog>
 

@@ -75,6 +75,16 @@
         { "label": "Uppercase", "value": "uppercase" }
       ],
       "defaultValue": "none"
+    },
+    {
+      "key": "headingWeight",
+      "label": "Heading weight",
+      "type": "range",
+      "variable": "--resume-heading-weight",
+      "min": 400,
+      "max": 800,
+      "step": 100,
+      "defaultValue": 500
     }
   ]
 }

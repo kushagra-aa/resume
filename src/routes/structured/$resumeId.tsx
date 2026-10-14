@@ -1,19 +1,25 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Code2, Download, Printer } from 'lucide-react'
+import { ChevronDown, Code2, Download, Printer, Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AppHeader } from '#/components/app-header'
 import { BackButton } from '#/components/back-button'
+import { ResumeHistoryDialog } from '#/components/resume-history-dialog'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { profileRepository } from '#/db/repositories/profile-repository'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
+import { resumeHistoryRepository } from '#/db/repositories/resume-history-repository'
 import { inferContactLink } from '#/features/profiles/contact-links'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportResumePackage } from '#/features/resume/source-package'
-import { createStructuredResume } from '#/features/resumes/create-structured-resume'
+import {
+  createStructuredResume,
+  defaultSectionOrderForTemplate,
+} from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
+import { parseStructuredResume } from '#/schemas/structured-resume'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
@@ -72,6 +78,72 @@ function VisibilityCheckbox({
   )
 }
 
+function sectionOrderGroup(templateId: string, section: ProfileSectionKey) {
+  if (templateId !== 'modern') return 'page'
+  return [
+    'summary',
+    'skills',
+    'education',
+    'certifications',
+    'awards',
+    'publications',
+  ].includes(section)
+    ? 'aside'
+    : 'main'
+}
+
+function getSortableItems(profile: Profile, section: ProfileSectionKey) {
+  switch (section) {
+    case 'personal':
+      return profile.links.map((item) => ({
+        id: item.id,
+        label: item.label || item.url || 'Contact link',
+      }))
+    case 'experience':
+      return profile.experience.map((item) => ({
+        id: item.id,
+        label: item.role || item.company || 'Experience',
+      }))
+    case 'education':
+      return profile.education.map((item) => ({
+        id: item.id,
+        label: item.degree || item.institution || 'Education',
+      }))
+    case 'skills':
+      return profile.skills.map((item) => ({
+        id: item.id,
+        label: item.name || 'Skill group',
+      }))
+    case 'projects':
+      return profile.projects.map((item) => ({
+        id: item.id,
+        label: item.name || 'Project',
+      }))
+    case 'certifications':
+      return profile.certifications.map((item) => ({
+        id: item.id,
+        label: item.name || item.issuer || 'Certification',
+      }))
+    case 'awards':
+      return profile.awards.map((item) => ({
+        id: item.id,
+        label: item.name || item.issuer || 'Award',
+      }))
+    case 'publications':
+      return profile.publications.map((item) => ({
+        id: item.id,
+        label: item.title || item.publisher || 'Publication',
+      }))
+    case 'customSections':
+      return profile.customSections.map((item) => ({
+        id: item.id,
+        label: item.title || 'Custom section',
+      }))
+    case 'summary':
+      return []
+  }
+}
+
 export const Route = createFileRoute('/structured/$resumeId')({
   component: StructuredResumeBuilder,
 })
@@ -80,6 +152,9 @@ function StructuredResumeBuilder() {
   const { resumeId } = Route.useParams()
   const navigate = useNavigate()
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const exportMenuRef = useRef<HTMLDetailsElement>(null)
+  const draggedSectionRef = useRef<ProfileSectionKey | null>(null)
+  const draggedItemRef = useRef<string | null>(null)
   const [resume, setResume] = useState<StructuredResume | null>(null)
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [templates, setTemplates] = useState<ResumeTemplate[]>([])
@@ -87,6 +162,36 @@ function StructuredResumeBuilder() {
   const [error, setError] = useState<string | null>(null)
   const [saveState, setSaveState] = useState('Loading…')
   const [frameHeight, setFrameHeight] = useState(1123)
+  const [mobilePanel, setMobilePanel] = useState<'edit' | 'preview'>('edit')
+  const [templateSearch, setTemplateSearch] = useState('')
+  const [templateFilter, setTemplateFilter] = useState<
+    'all' | 'built-in' | 'custom'
+  >('all')
+  const [orderItemsSection, setOrderItemsSection] =
+    useState<ProfileSectionKey>('experience')
+  const [templateSectionOpen, setTemplateSectionOpen] = useState(true)
+
+  useEffect(() => {
+    function closeExportMenu(event: PointerEvent) {
+      const menu = exportMenuRef.current
+      if (menu?.open && !menu.contains(event.target as Node))
+        menu.removeAttribute('open')
+    }
+
+    function handleExportMenuKeydown(event: KeyboardEvent) {
+      const menu = exportMenuRef.current
+      if (event.key !== 'Escape' || !menu?.open) return
+      menu.removeAttribute('open')
+      menu.querySelector('summary')?.focus()
+    }
+
+    document.addEventListener('pointerdown', closeExportMenu)
+    document.addEventListener('keydown', handleExportMenuKeydown)
+    return () => {
+      document.removeEventListener('pointerdown', closeExportMenu)
+      document.removeEventListener('keydown', handleExportMenuKeydown)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -152,6 +257,18 @@ function StructuredResumeBuilder() {
         : null,
     [profile, resume, template],
   )
+  const visibleTemplates = useMemo(() => {
+    const query = templateSearch.trim().toLowerCase()
+    return templates.filter((item) => {
+      const isCustom = item.id.startsWith('custom-')
+      return (
+        (templateFilter === 'all' ||
+          (templateFilter === 'custom' ? isCustom : !isCustom)) &&
+        (!query ||
+          `${item.name} ${item.description}`.toLowerCase().includes(query))
+      )
+    })
+  }, [templateFilter, templateSearch, templates])
 
   useEffect(() => {
     if (!resume || loading) return
@@ -238,6 +355,10 @@ function StructuredResumeBuilder() {
     updateResume((current) => ({
       ...current,
       templateId: next.id,
+      customization: {
+        ...current.customization,
+        sectionOrder: defaultSectionOrderForTemplate(next.id),
+      },
       templateConfiguration: Object.fromEntries(
         next.controls.map((control) => [control.key, control.defaultValue]),
       ),
@@ -251,6 +372,114 @@ function StructuredResumeBuilder() {
         [key]: value,
       },
     }))
+  }
+  function setSectionTitle(section: ProfileSectionKey, value: string) {
+    updateResume((current) => ({
+      ...current,
+      customization: {
+        ...current.customization,
+        sectionTitles: {
+          ...current.customization.sectionTitles,
+          [section]: value,
+        },
+      },
+    }))
+  }
+  function reorderSection(section: ProfileSectionKey, direction: -1 | 1) {
+    updateResume((current) => {
+      const order = [
+        ...(current.customization.sectionOrder ??
+          defaultSectionOrderForTemplate(current.templateId)),
+      ]
+      const index = order.indexOf(section)
+      const nextIndex = index + direction
+      if (
+        index < 0 ||
+        nextIndex < 0 ||
+        nextIndex >= order.length ||
+        sectionOrderGroup(current.templateId, order[nextIndex]!) !==
+          sectionOrderGroup(current.templateId, section)
+      )
+        return current
+      ;[order[index], order[nextIndex]] = [order[nextIndex]!, order[index]!]
+      return {
+        ...current,
+        customization: { ...current.customization, sectionOrder: order },
+      }
+    })
+  }
+  function reorderItems(
+    section: ProfileSectionKey,
+    itemIds: string[],
+    itemId: string,
+    direction: -1 | 1,
+  ) {
+    updateResume((current) => {
+      const savedOrder = current.customization.itemOrder?.[section] ?? itemIds
+      const order = [
+        ...savedOrder,
+        ...itemIds.filter((id) => !savedOrder.includes(id)),
+      ]
+      const index = order.indexOf(itemId)
+      const nextIndex = index + direction
+      if (index < 0 || nextIndex < 0 || nextIndex >= order.length)
+        return current
+      ;[order[index], order[nextIndex]] = [order[nextIndex]!, order[index]!]
+      return {
+        ...current,
+        customization: {
+          ...current.customization,
+          itemOrder: { ...current.customization.itemOrder, [section]: order },
+        },
+      }
+    })
+  }
+  function moveSection(section: ProfileSectionKey, target: ProfileSectionKey) {
+    updateResume((current) => {
+      if (
+        section === target ||
+        sectionOrderGroup(current.templateId, section) !==
+          sectionOrderGroup(current.templateId, target)
+      )
+        return current
+      const order = [
+        ...(current.customization.sectionOrder ??
+          defaultSectionOrderForTemplate(current.templateId)),
+      ]
+      const from = order.indexOf(section)
+      const to = order.indexOf(target)
+      if (from < 0 || to < 0) return current
+      order.splice(to, 0, order.splice(from, 1)[0]!)
+      return {
+        ...current,
+        customization: { ...current.customization, sectionOrder: order },
+      }
+    })
+  }
+  function moveItem(
+    section: ProfileSectionKey,
+    itemIds: string[],
+    itemId: string,
+    targetId: string,
+  ) {
+    updateResume((current) => {
+      const savedOrder = current.customization.itemOrder?.[section] ?? itemIds
+      const order = [
+        ...savedOrder,
+        ...itemIds.filter((id) => !savedOrder.includes(id)),
+      ]
+      const from = order.indexOf(itemId)
+      const to = order.indexOf(targetId)
+      if (from < 0 || to < 0 || from === to) return current
+      order.splice(to, 0, order.splice(from, 1)[0]!)
+      return {
+        ...current,
+        customization: {
+          ...current.customization,
+          itemOrder: { ...current.customization.itemOrder, [section]: order },
+        },
+      }
+    })
   }
   async function openPowerModeCopy() {
     if (!renderedDocument || !resume) return
@@ -303,36 +532,73 @@ function StructuredResumeBuilder() {
           />
         }
       >
-        <span className="save-status">
-          <span className="status-dot" />
-          {saveState}
-        </span>
-        <ThemeToggle />
-        <button
-          className="button button-secondary"
-          onClick={() => downloadSource(renderedDocument, 'html')}
-        >
-          <Download size={14} /> HTML
-        </button>
-        <button
-          className="button button-secondary"
-          onClick={() => downloadSource(renderedDocument, 'css')}
-        >
-          <Download size={14} /> CSS
-        </button>
-        <button
-          className="button button-secondary"
-          onClick={() => exportResumePackage(renderedDocument)}
-        >
-          <Download size={14} /> ZIP
-        </button>
-        <button
-          className="button button-secondary"
-          title="Create an independent HTML/CSS source copy. Future Easy Mode changes will not update this copy."
-          onClick={() => void openPowerModeCopy()}
-        >
-          <Code2 size={14} /> Edit source copy
-        </button>
+        <div className="builder-save-cluster">
+          <ResumeHistoryDialog
+            resumeId={resume.id}
+            onRestore={async (entry) => {
+              const restored = parseStructuredResume(entry.snapshot)
+              if (restored.id !== resume.id)
+                throw new Error('History entry belongs to another resume.')
+              await resumeHistoryRepository.recordBeforeUpdate(
+                resume,
+                restored,
+                'structured',
+                true,
+              )
+              const saved = await structuredResumeRepository.update({
+                ...restored,
+                updatedAt: new Date().toISOString(),
+              })
+              setResume(saved)
+              setSaveState('Saved locally')
+            }}
+          />
+          <span className="save-status" data-state={saveState}>
+            <span className="status-dot" />
+            {saveState}
+          </span>
+        </div>
+        <details className="builder-export-menu" ref={exportMenuRef}>
+          <summary className="button button-secondary">
+            <Download size={14} aria-hidden="true" /> Export
+            <ChevronDown size={13} aria-hidden="true" />
+          </summary>
+          <div className="builder-export-popover" aria-label="Export options">
+            <button
+              onClick={(event) => {
+                downloadSource(renderedDocument, 'html')
+                event.currentTarget.closest('details')?.removeAttribute('open')
+              }}
+            >
+              <Download size={14} aria-hidden="true" /> HTML source
+            </button>
+            <button
+              onClick={(event) => {
+                downloadSource(renderedDocument, 'css')
+                event.currentTarget.closest('details')?.removeAttribute('open')
+              }}
+            >
+              <Download size={14} aria-hidden="true" /> CSS source
+            </button>
+            <button
+              onClick={(event) => {
+                exportResumePackage(renderedDocument)
+                event.currentTarget.closest('details')?.removeAttribute('open')
+              }}
+            >
+              <Download size={14} aria-hidden="true" /> ZIP package
+            </button>
+            <button
+              title="Create an independent HTML/CSS source copy. Future Easy Mode changes will not update this copy."
+              onClick={(event) => {
+                void openPowerModeCopy()
+                event.currentTarget.closest('details')?.removeAttribute('open')
+              }}
+            >
+              <Code2 size={14} aria-hidden="true" /> Edit source copy
+            </button>
+          </div>
+        </details>
         <button
           className="button button-primary"
           onClick={() =>
@@ -344,9 +610,27 @@ function StructuredResumeBuilder() {
         >
           <Printer size={14} /> Print / PDF
         </button>
+        <ThemeToggle />
       </AppHeader>
 
-      <div className="structured-builder-layout">
+      <div
+        className="structured-builder-layout"
+        data-mobile-panel={mobilePanel}
+      >
+        <nav className="builder-mobile-tabs" aria-label="Builder panels">
+          <button
+            aria-pressed={mobilePanel === 'edit'}
+            onClick={() => setMobilePanel('edit')}
+          >
+            Edit content
+          </button>
+          <button
+            aria-pressed={mobilePanel === 'preview'}
+            onClick={() => setMobilePanel('preview')}
+          >
+            Preview
+          </button>
+        </nav>
         <aside
           className="builder-controls"
           aria-label="Resume content and template controls"
@@ -390,10 +674,43 @@ function StructuredResumeBuilder() {
           >
             Edit profile details
           </button>
-          <div className="builder-section-list">
-            <h2>Choose a template</h2>
+          <details
+            className="builder-section-list builder-template-section"
+            open={templateSectionOpen}
+            onToggle={(event) =>
+              setTemplateSectionOpen(event.currentTarget.open)
+            }
+          >
+            <summary>
+              <span>Choose a template</span>
+              <ChevronDown size={17} aria-hidden="true" />
+            </summary>
+            <label className="template-search">
+              <Search size={15} aria-hidden="true" />
+              <span className="sr-only">Search templates</span>
+              <input
+                value={templateSearch}
+                onChange={(event) => setTemplateSearch(event.target.value)}
+                placeholder="Search templates"
+              />
+            </label>
+            <div className="template-filter" aria-label="Filter templates">
+              {(['all', 'built-in', 'custom'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  aria-pressed={templateFilter === filter}
+                  onClick={() => setTemplateFilter(filter)}
+                >
+                  {filter === 'all'
+                    ? 'All'
+                    : filter === 'built-in'
+                      ? 'Built-in'
+                      : 'Custom'}
+                </button>
+              ))}
+            </div>
             <div className="template-gallery">
-              {templates.map((item) => {
+              {visibleTemplates.map((item) => {
                 const preview = createTemplatePreviewDocument(item)
                 return (
                   <button
@@ -423,8 +740,13 @@ function StructuredResumeBuilder() {
                   </button>
                 )
               })}
+              {visibleTemplates.length === 0 ? (
+                <p className="template-controls-empty">
+                  No templates match this search.
+                </p>
+              ) : null}
             </div>
-          </div>
+          </details>
 
           <div className="builder-section-list">
             <h2>Customize appearance</h2>
@@ -496,6 +818,185 @@ function StructuredResumeBuilder() {
 
           <div className="builder-section-list">
             <h2>Choose what to include</h2>
+            <details className="section-title-customization">
+              <summary>Customize section headings</summary>
+              {(
+                Object.entries(sectionLabels) as Array<
+                  [ProfileSectionKey, string]
+                >
+              )
+                .filter(([section]) => section !== 'personal')
+                .map(([section, label]) => (
+                  <label key={section}>
+                    {label}
+                    <input
+                      value={resume.customization.sectionTitles[section] ?? ''}
+                      placeholder={label}
+                      onChange={(event) =>
+                        setSectionTitle(section, event.target.value)
+                      }
+                    />
+                  </label>
+                ))}
+            </details>
+            <details className="section-title-customization">
+              <summary>Reorder sections</summary>
+              <p className="builder-item-description">
+                Sections stay within their template column.
+              </p>
+              <ol className="builder-order-list">
+                {(
+                  resume.customization.sectionOrder ??
+                  defaultSectionOrderForTemplate(resume.templateId)
+                ).map((section, index, order) => {
+                  const group = sectionOrderGroup(resume.templateId, section)
+                  const canMoveUp =
+                    index > 0 &&
+                    sectionOrderGroup(resume.templateId, order[index - 1]!) ===
+                      group
+                  const canMoveDown =
+                    index < order.length - 1 &&
+                    sectionOrderGroup(resume.templateId, order[index + 1]!) ===
+                      group
+                  return (
+                    <li
+                      key={section}
+                      draggable
+                      onDragStart={(event) => {
+                        draggedSectionRef.current = section
+                        event.dataTransfer.effectAllowed = 'move'
+                      }}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => {
+                        event.preventDefault()
+                        const dragged = draggedSectionRef.current
+                        if (dragged) moveSection(dragged, section)
+                        draggedSectionRef.current = null
+                      }}
+                    >
+                      <span>{sectionLabels[section]}</span>
+                      <span className="builder-order-actions">
+                        <button
+                          type="button"
+                          aria-label={`Move ${sectionLabels[section]} up`}
+                          disabled={!canMoveUp}
+                          onClick={() => reorderSection(section, -1)}
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Move ${sectionLabels[section]} down`}
+                          disabled={!canMoveDown}
+                          onClick={() => reorderSection(section, 1)}
+                        >
+                          ↓
+                        </button>
+                      </span>
+                    </li>
+                  )
+                })}
+              </ol>
+            </details>
+            <details className="section-title-customization">
+              <summary>Reorder items</summary>
+              <label>
+                Section
+                <select
+                  value={orderItemsSection}
+                  onChange={(event) =>
+                    setOrderItemsSection(
+                      event.target.value as ProfileSectionKey,
+                    )
+                  }
+                >
+                  {(Object.keys(sectionLabels) as ProfileSectionKey[])
+                    .filter(
+                      (section) => getSortableItems(profile, section).length,
+                    )
+                    .map((section) => (
+                      <option key={section} value={section}>
+                        {sectionLabels[section]}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <ol className="builder-order-list">
+                {(() => {
+                  const items = getSortableItems(profile, orderItemsSection)
+                  const savedOrder =
+                    resume.customization.itemOrder?.[orderItemsSection] ?? []
+                  const order = [
+                    ...savedOrder,
+                    ...items
+                      .map((item) => item.id)
+                      .filter((id) => !savedOrder.includes(id)),
+                  ]
+                  const itemById = new Map(items.map((item) => [item.id, item]))
+                  return order.flatMap((id, index) => {
+                    const item = itemById.get(id)
+                    if (!item) return []
+                    return (
+                      <li
+                        key={id}
+                        draggable
+                        onDragStart={(event) => {
+                          draggedItemRef.current = id
+                          event.dataTransfer.effectAllowed = 'move'
+                        }}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault()
+                          const dragged = draggedItemRef.current
+                          if (dragged)
+                            moveItem(
+                              orderItemsSection,
+                              items.map((value) => value.id),
+                              dragged,
+                              id,
+                            )
+                          draggedItemRef.current = null
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        <span className="builder-order-actions">
+                          <button
+                            type="button"
+                            aria-label={`Move ${item.label} up`}
+                            disabled={index === 0}
+                            onClick={() =>
+                              reorderItems(
+                                orderItemsSection,
+                                items.map((value) => value.id),
+                                id,
+                                -1,
+                              )
+                            }
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Move ${item.label} down`}
+                            disabled={index === order.length - 1}
+                            onClick={() =>
+                              reorderItems(
+                                orderItemsSection,
+                                items.map((value) => value.id),
+                                id,
+                                1,
+                              )
+                            }
+                          >
+                            ↓
+                          </button>
+                        </span>
+                      </li>
+                    )
+                  })
+                })()}
+              </ol>
+            </details>
             <section className="builder-content-section">
               <VisibilityCheckbox
                 label={sectionLabels.personal}

@@ -15,13 +15,17 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { BackButton } from '#/components/back-button'
 import { AppDialog } from '#/components/app-dialog'
 import { AppHeader } from '#/components/app-header'
+import { ResumeHistoryDialog } from '#/components/resume-history-dialog'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { resumeRepository } from '#/db/repositories/resume-repository'
+import { resumeHistoryRepository } from '#/db/repositories/resume-history-repository'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { loadResumes } from '#/features/resume/services/resume-storage'
 import { exportResumePackage } from '#/features/resume/source-package'
 import { createStarterDocument } from '#/features/templates/starter-template'
 import type { ResumeDocument } from '#/models/resume'
+import type { ResumeHistoryEntry } from '#/models/resume-history'
+import { parseResumeDocument } from '#/schemas/resume'
 
 export type EditorKind = 'html' | 'css'
 
@@ -452,6 +456,46 @@ export function ResumeEditor() {
           />
         }
       >
+        {resume ? (
+          <ResumeHistoryDialog
+            resumeId={resume.id}
+            onRestore={async (entry: ResumeHistoryEntry) => {
+              const restored = parseResumeDocument(entry.snapshot)
+              if (restored.id !== resume.id)
+                throw new Error('History entry belongs to another resume.')
+              if (dirty) {
+                const savedCurrent = {
+                  ...resume,
+                  updatedAt: new Date().toISOString(),
+                }
+                await resumeRepository.update(savedCurrent)
+                await resumeHistoryRepository.recordBeforeUpdate(
+                  savedCurrent,
+                  restored,
+                  'source',
+                  true,
+                )
+              } else {
+                await resumeHistoryRepository.recordBeforeUpdate(
+                  resume,
+                  restored,
+                  'source',
+                  true,
+                )
+              }
+              const saved = await resumeRepository.update({
+                ...restored,
+                updatedAt: new Date().toISOString(),
+              })
+              setDocuments((current) =>
+                current.map((item) => (item.id === saved.id ? saved : item)),
+              )
+              setDirty(false)
+              setSavedAt(new Date())
+              setSaveError(false)
+            }}
+          />
+        ) : null}
         <span className="save-status">
           <span className="status-dot" />
           {saveError

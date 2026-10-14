@@ -5,6 +5,7 @@ import {
 } from '#/schemas/structured-resume'
 
 import { resumeDatabase } from '../client'
+import { resumeHistoryRepository } from './resume-history-repository'
 
 function assertStorageAvailable() {
   if (typeof indexedDB === 'undefined') {
@@ -47,6 +48,13 @@ export const structuredResumeRepository = {
   async update(resume: StructuredResume): Promise<StructuredResume> {
     assertStorageAvailable()
     const validated = parseStructuredResume(resume)
+    const previous = await structuredResumeRepository.get(validated.id)
+    if (previous)
+      await resumeHistoryRepository.recordBeforeUpdate(
+        previous,
+        validated,
+        'structured',
+      )
     const updated = await resumeDatabase.structuredResumes.update(
       validated.id,
       validated,
@@ -73,6 +81,7 @@ export const structuredResumeRepository = {
   async delete(id: string): Promise<void> {
     assertStorageAvailable()
     await resumeDatabase.structuredResumes.delete(id)
+    await resumeHistoryRepository.deleteByResumeId(id)
   },
 
   async listByProfile(profileId: string): Promise<StructuredResume[]> {

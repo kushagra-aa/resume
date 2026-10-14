@@ -52,6 +52,10 @@ export const structuredResumeSchema = z.object({
   ),
   customization: z.object({
     sectionTitles: z.partialRecord(z.enum(profileSectionKeys), z.string()),
+    sectionOrder: z.array(z.enum(profileSectionKeys)).optional(),
+    itemOrder: z
+      .partialRecord(z.enum(profileSectionKeys), z.array(z.string()))
+      .optional(),
   }),
   createdAt: isoDateString,
   updatedAt: isoDateString,

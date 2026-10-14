@@ -55,7 +55,7 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="button button-secondary theme-toggle"
+      className="button button-secondary theme-toggle icon-button"
       type="button"
       aria-label={isDark ? 'Use light theme' : 'Use dark theme'}
       title={isDark ? 'Use light theme' : 'Use dark theme'}
@@ -67,7 +67,6 @@ export function ThemeToggle() {
       ) : (
         <Moon size={15} aria-hidden="true" />
       )}
-      <span>{isDark ? 'Light' : 'Dark'}</span>
     </button>
   )
 }

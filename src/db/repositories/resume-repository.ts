@@ -2,6 +2,7 @@ import type { ResumeDocument } from '#/models/resume'
 import { parseResumeDocument, safeParseResumeDocument } from '#/schemas/resume'
 
 import { resumeDatabase } from '../client'
+import { resumeHistoryRepository } from './resume-history-repository'
 
 export class ResumeStorageUnavailableError extends Error {
   constructor() {
@@ -51,6 +52,13 @@ export const resumeRepository = {
   async update(document: ResumeDocument): Promise<ResumeDocument> {
     assertStorageAvailable()
     const validated = parseResumeDocument(document)
+    const previous = await resumeRepository.get(validated.id)
+    if (previous)
+      await resumeHistoryRepository.recordBeforeUpdate(
+        previous,
+        validated,
+        'source',
+      )
     const updated = await resumeDatabase.documents.update(
       validated.id,
       validated,
@@ -79,5 +87,6 @@ export const resumeRepository = {
   async delete(id: string): Promise<void> {
     assertStorageAvailable()
     await resumeDatabase.documents.delete(id)
+    await resumeHistoryRepository.deleteByResumeId(id)
   },
 }

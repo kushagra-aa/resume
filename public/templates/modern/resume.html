@@ -26,19 +26,19 @@
   <div class="grid">
     <aside>
       {{#sectionVisibility.summary}}
-      <section>
+      <section data-resume-section="summary">
         <h2>{{sectionTitles.summary}}</h2>
         <p>{{summary}}</p>
       </section>
       {{/sectionVisibility.summary}} {{#sectionVisibility.skills}}
-      <section>
+      <section data-resume-section="skills">
         <h2>{{sectionTitles.skills}}</h2>
         <div class="skills">
           {{#skills}}<span>{{#group}}{{/group}}{{value}}</span>{{/skills}}
         </div>
       </section>
       {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
-      <section>
+      <section data-resume-section="education">
         <h2>{{sectionTitles.education}}</h2>
         {{#education}}
         <article class="aside-item">
@@ -53,7 +53,7 @@
         {{/education}}
       </section>
       {{/sectionVisibility.education}} {{#sectionVisibility.certifications}}
-      <section>
+      <section data-resume-section="certifications">
         <h2>{{sectionTitles.certifications}}</h2>
         {{#certifications}}
         <article class="aside-item">
@@ -75,7 +75,7 @@
         {{/certifications}}
       </section>
       {{/sectionVisibility.certifications}} {{#sectionVisibility.awards}}
-      <section>
+      <section data-resume-section="awards">
         <h2>{{sectionTitles.awards}}</h2>
         {{#awards}}
         <article class="aside-item">
@@ -90,7 +90,7 @@
         {{/awards}}
       </section>
       {{/sectionVisibility.awards}} {{#sectionVisibility.publications}}
-      <section>
+      <section data-resume-section="publications">
         <h2>{{sectionTitles.publications}}</h2>
         {{#publications}}
         <article class="aside-item">
@@ -117,7 +117,7 @@
     </aside>
     <div class="main-column">
       {{#sectionVisibility.experience}}
-      <section>
+      <section data-resume-section="experience">
         <h2>{{sectionTitles.experience}}</h2>
         {{#experience}}
         <article class="timeline-item">
@@ -139,7 +139,7 @@
         {{/experience}}
       </section>
       {{/sectionVisibility.experience}} {{#sectionVisibility.projects}}
-      <section>
+      <section data-resume-section="projects">
         <h2>{{sectionTitles.projects}}</h2>
         {{#projects}}
         <article class="project">
@@ -171,7 +171,7 @@
       </section>
       {{/sectionVisibility.projects}}
       {{#sectionVisibility.customSections}}{{#customSections}}
-      <section class="custom-section">
+      <section class="custom-section" data-resume-section="customSections">
         {{#hasTitle}}
         <h2>{{title}}</h2>
         {{/hasTitle}}

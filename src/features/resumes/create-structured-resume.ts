@@ -17,6 +17,33 @@ const profileSections: ProfileSectionKey[] = [
   'customSections',
 ]
 
+export function defaultSectionOrderForTemplate(
+  templateId: string,
+): ProfileSectionKey[] {
+  return templateId === 'modern'
+    ? [
+        'summary',
+        'skills',
+        'education',
+        'certifications',
+        'awards',
+        'publications',
+        'experience',
+        'projects',
+        'customSections',
+      ]
+    : [
+        'skills',
+        'experience',
+        'projects',
+        'education',
+        'certifications',
+        'awards',
+        'publications',
+        'customSections',
+      ]
+}
+
 export function createStructuredResume(
   profile: Profile,
   templateId: string,
@@ -86,7 +113,11 @@ export function createStructuredResume(
       },
     },
     templateConfiguration: {},
-    customization: { sectionTitles: {} },
+    customization: {
+      sectionTitles: {},
+      sectionOrder: defaultSectionOrderForTemplate(templateId),
+      itemOrder: {},
+    },
     createdAt: now,
     updatedAt: now,
   }
