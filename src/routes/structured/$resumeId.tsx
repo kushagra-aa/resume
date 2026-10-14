@@ -1,5 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, Code2, Download, Printer, Search } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  Download,
+  Printer,
+  Search,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -170,6 +180,38 @@ function StructuredResumeBuilder() {
   const [orderItemsSection, setOrderItemsSection] =
     useState<ProfileSectionKey>('experience')
   const [templateSectionOpen, setTemplateSectionOpen] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [previewZoom, setPreviewZoom] = useState(100)
+
+  function toggleSidebar() {
+    const nextCollapsed = !sidebarCollapsed
+    setSidebarCollapsed(nextCollapsed)
+    if (window.matchMedia('(max-width: 900px)').matches)
+      setMobilePanel(nextCollapsed ? 'preview' : 'edit')
+  }
+
+  useEffect(() => {
+    function handleSidebarShortcut(event: KeyboardEvent) {
+      const target = event.target
+      const isTypingTarget =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.matches('input, textarea, select, [role="textbox"]'))
+      if (
+        isTypingTarget ||
+        !(event.metaKey || event.ctrlKey) ||
+        event.shiftKey ||
+        event.altKey ||
+        event.key !== '\\'
+      )
+        return
+      event.preventDefault()
+      toggleSidebar()
+    }
+
+    document.addEventListener('keydown', handleSidebarShortcut)
+    return () => document.removeEventListener('keydown', handleSidebarShortcut)
+  }, [sidebarCollapsed])
 
   useEffect(() => {
     function closeExportMenu(event: PointerEvent) {
@@ -616,7 +658,24 @@ function StructuredResumeBuilder() {
       <div
         className="structured-builder-layout"
         data-mobile-panel={mobilePanel}
+        data-sidebar-collapsed={sidebarCollapsed}
       >
+        <button
+          className="button button-secondary icon-button builder-sidebar-toggle"
+          type="button"
+          aria-label={
+            sidebarCollapsed ? 'Show settings sidebar' : 'Hide settings sidebar'
+          }
+          title={`${sidebarCollapsed ? 'Show' : 'Hide'} settings sidebar (Ctrl/Cmd+\\)`}
+          aria-expanded={!sidebarCollapsed}
+          onClick={toggleSidebar}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight size={17} aria-hidden="true" />
+          ) : (
+            <ChevronLeft size={17} aria-hidden="true" />
+          )}
+        </button>
         <nav className="builder-mobile-tabs" aria-label="Builder panels">
           <button
             aria-pressed={mobilePanel === 'edit'}
@@ -1272,19 +1331,63 @@ function StructuredResumeBuilder() {
               <p className="panel-kicker">Live preview</p>
               <h1>{resume.name}</h1>
             </div>
-            <span>{template.name}</span>
+            <div className="builder-preview-tools">
+              <span>{template.name}</span>
+              <div className="preview-zoom-controls" aria-label="Preview zoom">
+                <button
+                  type="button"
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                  disabled={previewZoom <= 50}
+                  onClick={() =>
+                    setPreviewZoom((zoom) => Math.max(50, zoom - 10))
+                  }
+                >
+                  <ZoomOut size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="preview-zoom-level"
+                  aria-label="Reset preview zoom to 100 percent"
+                  title="Reset zoom"
+                  onClick={() => setPreviewZoom(100)}
+                >
+                  {previewZoom}%
+                </button>
+                <button
+                  type="button"
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                  disabled={previewZoom >= 150}
+                  onClick={() =>
+                    setPreviewZoom((zoom) => Math.min(150, zoom + 10))
+                  }
+                >
+                  <ZoomIn size={16} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
           </div>
           <div className="builder-preview-stage">
             <div
               className="builder-paper"
-              style={{ height: `${frameHeight}px` }}
+              style={{
+                width: `${793.7 * (previewZoom / 100)}px`,
+                maxWidth: '100%',
+                height: `${frameHeight * (previewZoom / 100)}px`,
+              }}
             >
               <iframe
                 ref={frameRef}
                 title={`${resume.name} live preview`}
                 sandbox="allow-scripts"
                 srcDoc={createResumeSrcDoc(renderedDocument)}
-                style={{ height: `${frameHeight}px` }}
+                style={{
+                  height: `${frameHeight}px`,
+                  width: `calc(100% / ${previewZoom / 100})`,
+                  transform: `scale(${previewZoom / 100})`,
+                  transformOrigin: 'top left',
+                }}
               />
             </div>
           </div>
