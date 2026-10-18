@@ -61,7 +61,7 @@ const contactLinkIconComponents = {
   link: LinkIcon,
 } satisfies Record<ContactLinkIcon, typeof LinkIcon>
 
-const inferredIconChoices: Record<string, ContactLinkIcon> = {
+const inferredIconChoices: Partial<Record<string, ContactLinkIcon>> = {
   website: 'website',
   github: 'code',
   linkedin: 'professional',

@@ -1,4 +1,5 @@
-import Dexie, { type Table } from 'dexie'
+import Dexie from 'dexie'
+import type { Table } from 'dexie'
 
 import type { ResumeDocument } from '#/models/resume'
 import type { Profile } from '#/models/profile'

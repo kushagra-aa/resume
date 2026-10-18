@@ -20,12 +20,16 @@ export const resumeHistoryRepository = {
       .where('resumeId')
       .equals(previous.id)
       .toArray()
-    const latest = entries.sort((a, b) =>
-      b.createdAt.localeCompare(a.createdAt),
-    )[0]
+    const latest = entries.reduce<ResumeHistoryEntry | null>(
+      (currentLatest, entry) =>
+        currentLatest === null || entry.createdAt > currentLatest.createdAt
+          ? entry
+          : currentLatest,
+      null,
+    )
     if (
       !force &&
-      latest &&
+      latest !== null &&
       latest.kind === kind &&
       Date.now() - Date.parse(latest.createdAt) < CHECKPOINT_INTERVAL_MS
     )

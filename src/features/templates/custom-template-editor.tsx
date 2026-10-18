@@ -8,8 +8,8 @@ import { customTemplateRepository } from '#/db/repositories/custom-template-repo
 import {
   CodeEditor,
   formatSource,
-  type EditorKind,
 } from '#/features/editor/components/resume-editor'
+import type { EditorKind } from '#/features/editor/components/resume-editor'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportTemplatePackage } from '#/features/resume/source-package'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'

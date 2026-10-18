@@ -84,7 +84,7 @@ export function createStructuredResume(
       items: Object.fromEntries(
         Object.entries(itemIds).map(([key, ids]) => [
           key,
-          Object.fromEntries((ids ?? []).map((id) => [id, true])),
+          Object.fromEntries(ids.map((id) => [id, true])),
         ]),
       ),
       bullets: {

@@ -445,11 +445,11 @@ function StructuredResumeBuilder() {
         index < 0 ||
         nextIndex < 0 ||
         nextIndex >= order.length ||
-        sectionOrderGroup(current.templateId, order[nextIndex]!) !==
+        sectionOrderGroup(current.templateId, order[nextIndex]) !==
           sectionOrderGroup(current.templateId, section)
       )
         return current
-      ;[order[index], order[nextIndex]] = [order[nextIndex]!, order[index]!]
+      ;[order[index], order[nextIndex]] = [order[nextIndex], order[index]]
       return {
         ...current,
         customization: { ...current.customization, sectionOrder: order },
@@ -472,7 +472,7 @@ function StructuredResumeBuilder() {
       const nextIndex = index + direction
       if (index < 0 || nextIndex < 0 || nextIndex >= order.length)
         return current
-      ;[order[index], order[nextIndex]] = [order[nextIndex]!, order[index]!]
+      ;[order[index], order[nextIndex]] = [order[nextIndex], order[index]]
       return {
         ...current,
         customization: {
@@ -497,7 +497,7 @@ function StructuredResumeBuilder() {
       const from = order.indexOf(section)
       const to = order.indexOf(target)
       if (from < 0 || to < 0) return current
-      order.splice(to, 0, order.splice(from, 1)[0]!)
+      order.splice(to, 0, order.splice(from, 1)[0])
       return {
         ...current,
         customization: { ...current.customization, sectionOrder: order },
@@ -519,7 +519,7 @@ function StructuredResumeBuilder() {
       const from = order.indexOf(itemId)
       const to = order.indexOf(targetId)
       if (from < 0 || to < 0 || from === to) return current
-      order.splice(to, 0, order.splice(from, 1)[0]!)
+      order.splice(to, 0, order.splice(from, 1)[0])
       return {
         ...current,
         customization: {
@@ -930,11 +930,11 @@ function StructuredResumeBuilder() {
                   const group = sectionOrderGroup(resume.templateId, section)
                   const canMoveUp =
                     index > 0 &&
-                    sectionOrderGroup(resume.templateId, order[index - 1]!) ===
+                    sectionOrderGroup(resume.templateId, order[index - 1]) ===
                       group
                   const canMoveDown =
                     index < order.length - 1 &&
-                    sectionOrderGroup(resume.templateId, order[index + 1]!) ===
+                    sectionOrderGroup(resume.templateId, order[index + 1]) ===
                       group
                   return (
                     <li
@@ -1155,7 +1155,7 @@ function StructuredResumeBuilder() {
                             nested
                             label={bullet || `Bullet ${index + 1}`}
                             checked={
-                              resume.selection.bullets.experience[item.id]?.[
+                              resume.selection.bullets.experience[item.id][
                                 id
                               ] !== false
                             }
@@ -1256,9 +1256,8 @@ function StructuredResumeBuilder() {
                             nested
                             label={bullet || `Highlight ${index + 1}`}
                             checked={
-                              resume.selection.bullets.projects[item.id]?.[
-                                id
-                              ] !== false
+                              resume.selection.bullets.projects[item.id][id] !==
+                              false
                             }
                             onChange={(checked) =>
                               setBulletVisible('projects', item.id, id, checked)

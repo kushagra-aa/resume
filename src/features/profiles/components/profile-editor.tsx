@@ -441,10 +441,12 @@ export function ProfileEditor({ profileId }: { profileId: string }) {
     if (loading) return
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (visible)
+        const visible =
+          entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+            .at(0) ?? null
+        if (visible !== null)
           setActiveSection(visible.target.id.replace('profile-section-', ''))
       },
       { rootMargin: '-110px 0px -70% 0px', threshold: [0, 0.2, 0.5] },
@@ -1134,7 +1136,7 @@ function OptionalSections({
         [key]: items.map((item) =>
           item.id === id ? change(item as unknown as T) : item,
         ),
-      } as Profile
+      }
     })
   const remove = (
     key: 'certifications' | 'awards' | 'publications',

@@ -46,8 +46,10 @@ import {
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { createResumeCopyName } from '#/features/resume/duplicate-name'
 import { profileRepository } from '#/db/repositories/profile-repository'
-import type { ResumeTemplate } from '#/features/templates/template-types'
-import type { CustomTemplate } from '#/features/templates/template-types'
+import type {
+  ResumeTemplate,
+  CustomTemplate,
+} from '#/features/templates/template-types'
 import type { Profile } from '#/models/profile'
 import type { StructuredResume } from '#/models/structured-resume'
 import type { ResumeDocument } from '#/models/resume'
@@ -311,10 +313,10 @@ function Dashboard() {
         current.map((item) => (item.id === updated.id ? updated : item)),
       )
       setTemplateRenameTarget(null)
-    } catch (renameError) {
+    } catch (templateRenameFailure) {
       setError(
-        renameError instanceof Error
-          ? renameError.message
+        templateRenameFailure instanceof Error
+          ? templateRenameFailure.message
           : 'The template could not be renamed.',
       )
     }

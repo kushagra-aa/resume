@@ -4,8 +4,13 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { resumeDatabase } from '#/db/client'
 import { customTemplateRepository } from '#/db/repositories/custom-template-repository'
+import { createStructuredResume } from '#/features/resumes/create-structured-resume'
+import { renderStructuredResume } from '#/features/resumes/structured-renderer'
 import { duplicateTemplate } from '#/features/templates/custom-template-service'
-import { completeTemplateFixture } from './fixtures/structured-render-fixtures'
+import {
+  completeProfileFixture,
+  completeTemplateFixture,
+} from './fixtures/structured-render-fixtures'
 
 describe('custom template persistence', () => {
   beforeEach(async () => {
@@ -38,5 +43,29 @@ describe('custom template persistence', () => {
     )
     await customTemplateRepository.delete(custom.id)
     expect(await customTemplateRepository.get(custom.id)).toBeNull()
+  })
+
+  it('skips malformed custom templates without hiding valid templates', async () => {
+    const valid = await duplicateTemplate(completeTemplateFixture)
+    await resumeDatabase.customTemplates.put({ id: 'broken' } as never)
+
+    expect(await customTemplateRepository.get('broken')).toBeNull()
+    expect(await customTemplateRepository.list()).toEqual([valid])
+  })
+
+  it('renders a custom template for a structured resume without changing its source', async () => {
+    const custom = await duplicateTemplate(completeTemplateFixture)
+    custom.html = '<main><h1>Custom renderer test</h1></main>'
+    await customTemplateRepository.update(custom)
+    const resume = createStructuredResume(completeProfileFixture, custom.id)
+
+    const rendered = renderStructuredResume(
+      completeProfileFixture,
+      resume,
+      custom,
+    )
+
+    expect(rendered.html).toContain('Custom renderer test')
+    expect(completeTemplateFixture.html).not.toContain('Custom renderer test')
   })
 })

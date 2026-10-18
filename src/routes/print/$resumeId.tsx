@@ -8,8 +8,8 @@ import { createResumeSrcDoc } from '#/features/resume/runtime'
 import {
   estimatePrintPageCount,
   isPrintPageMargins,
-  type PrintPageMargins,
 } from '#/features/resume/print-pagination'
+import type { PrintPageMargins } from '#/features/resume/print-pagination'
 import { loadStructuredResumeDocument } from '#/features/resumes/structured-renderer'
 import type { ResumeDocument } from '#/models/resume'
 

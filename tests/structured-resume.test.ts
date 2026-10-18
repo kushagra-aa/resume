@@ -8,8 +8,10 @@ import { structuredResumeRepository } from '#/db/repositories/structured-resume-
 import { createStructuredResume } from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
 import type { ResumeDocument } from '#/models/resume'
-import { completeProfileFixture } from './fixtures/structured-render-fixtures'
-import { completeTemplateFixture } from './fixtures/structured-render-fixtures'
+import {
+  completeProfileFixture,
+  completeTemplateFixture,
+} from './fixtures/structured-render-fixtures'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { customTemplateRepository } from '#/db/repositories/custom-template-repository'
 
@@ -59,6 +61,11 @@ describe('structured resume persistence and legacy compatibility', () => {
 
   it('skips malformed structured resume records without hiding legacy documents', async () => {
     await resumeDatabase.structuredResumes.put({ id: 'broken' } as never)
+    const profile = structuredClone(completeProfileFixture)
+    await profileRepository.create(profile)
+    const validResume = await structuredResumeRepository.create(
+      createStructuredResume(profile, completeTemplateFixture.id, 'Valid'),
+    )
     const legacy: ResumeDocument = {
       id: 'legacy-one',
       name: 'Legacy source',
@@ -70,7 +77,7 @@ describe('structured resume persistence and legacy compatibility', () => {
     await resumeRepository.create(legacy)
 
     expect(await structuredResumeRepository.get('broken')).toBeNull()
-    expect(await structuredResumeRepository.list()).toEqual([])
+    expect(await structuredResumeRepository.list()).toEqual([validResume])
     expect(await resumeRepository.get(legacy.id)).toEqual(legacy)
   })
 

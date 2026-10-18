@@ -39,9 +39,11 @@ describe('profile repository', () => {
   })
 
   it('skips malformed records when reading', async () => {
+    const valid = createEmptyProfile('Good profile')
+    await profileRepository.create(valid)
     await resumeDatabase.profiles.put({ id: 'malformed' } as never)
 
     expect(await profileRepository.get('malformed')).toBeNull()
-    expect(await profileRepository.list()).toEqual([])
+    expect(await profileRepository.list()).toEqual([valid])
   })
 })

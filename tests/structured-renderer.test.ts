@@ -50,7 +50,7 @@ describe('structured resume rendering', () => {
     const resume = makeResume()
     resume.selection.sections.skills = false
     resume.selection.items.experience!['experience-one'] = false
-    resume.selection.bullets.projects['project-one']!['project-one-bullet-0'] =
+    resume.selection.bullets.projects['project-one']['project-one-bullet-0'] =
       false
     const before = structuredClone(profile)
     const data = createStructuredTemplateData(profile, resume)
@@ -195,7 +195,7 @@ describe('structured resume rendering', () => {
   it('renders selectable Lucide link SVGs and respects the resume icon toggle', () => {
     const profile = structuredClone(completeProfileFixture)
     const resume = makeResume()
-    profile.links[0]!.icon = 'website'
+    profile.links[0].icon = 'website'
     const template = {
       ...completeTemplateFixture,
       html: '{{#links}}<a href="{{href}}">{{{iconSvg}}}{{label}}</a>{{/links}}',
@@ -216,7 +216,7 @@ describe('structured resume rendering', () => {
 
   it('exposes safe credential and publication links and independent custom metadata', () => {
     const profile = structuredClone(completeProfileFixture)
-    profile.customSections[0]!.items = [
+    profile.customSections[0].items = [
       {
         id: 'title-only',
         title: 'Title only',
@@ -239,14 +239,14 @@ describe('structured resume rendering', () => {
         hasUrl: boolean
         meta: string
       }>
-    )[0]!
+    )[0]
     const publication = (
       data.publications as Array<{
         url: string
         hasUrl: boolean
         meta: string
       }>
-    )[0]!
+    )[0]
     const customItems = (
       data.customSections as Array<{
         items: Array<{
@@ -255,7 +255,7 @@ describe('structured resume rendering', () => {
           hasDescription: boolean
         }>
       }>
-    )[0]!.items
+    )[0].items
 
     expect(certification).toMatchObject({
       url: 'https://example.test/cert',
@@ -325,7 +325,7 @@ describe('structured resume rendering', () => {
   it('renders reordered profile items in their resume-specific order', () => {
     const profile = structuredClone(completeProfileFixture)
     const secondExperience = {
-      ...profile.experience[0]!,
+      ...profile.experience[0],
       id: 'experience-second',
       company: 'Second Company',
       role: 'Second Role',
@@ -333,7 +333,7 @@ describe('structured resume rendering', () => {
     profile.experience.push(secondExperience)
     const resume = makeResume()
     resume.customization.itemOrder = {
-      experience: ['experience-second', profile.experience[0]!.id],
+      experience: ['experience-second', profile.experience[0].id],
     }
 
     const data = createStructuredTemplateData(profile, resume)
@@ -341,7 +341,7 @@ describe('structured resume rendering', () => {
 
     expect(experience.map((item) => item.company)).toEqual([
       'Second Company',
-      profile.experience[0]!.company,
+      profile.experience[0].company,
     ])
   })
 

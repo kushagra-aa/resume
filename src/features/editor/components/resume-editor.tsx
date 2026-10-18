@@ -84,7 +84,7 @@ export function formatSource(source: string, kind: EditorKind) {
       .replace(/\s*\{\s*/g, ' {\n  ')
       .replace(/;\s*/g, ';\n  ')
       .replace(/\s*\}\s*/g, '\n}\n')
-      .replace(/\n  \n/g, '\n')
+      .replace(/\n {2}\n/g, '\n')
       .trim()
   }
 
@@ -456,46 +456,44 @@ export function ResumeEditor() {
           />
         }
       >
-        {resume ? (
-          <ResumeHistoryDialog
-            resumeId={resume.id}
-            onRestore={async (entry: ResumeHistoryEntry) => {
-              const restored = parseResumeDocument(entry.snapshot)
-              if (restored.id !== resume.id)
-                throw new Error('History entry belongs to another resume.')
-              if (dirty) {
-                const savedCurrent = {
-                  ...resume,
-                  updatedAt: new Date().toISOString(),
-                }
-                await resumeRepository.update(savedCurrent)
-                await resumeHistoryRepository.recordBeforeUpdate(
-                  savedCurrent,
-                  restored,
-                  'source',
-                  true,
-                )
-              } else {
-                await resumeHistoryRepository.recordBeforeUpdate(
-                  resume,
-                  restored,
-                  'source',
-                  true,
-                )
-              }
-              const saved = await resumeRepository.update({
-                ...restored,
+        <ResumeHistoryDialog
+          resumeId={resume.id}
+          onRestore={async (entry: ResumeHistoryEntry) => {
+            const restored = parseResumeDocument(entry.snapshot)
+            if (restored.id !== resume.id)
+              throw new Error('History entry belongs to another resume.')
+            if (dirty) {
+              const savedCurrent = {
+                ...resume,
                 updatedAt: new Date().toISOString(),
-              })
-              setDocuments((current) =>
-                current.map((item) => (item.id === saved.id ? saved : item)),
+              }
+              await resumeRepository.update(savedCurrent)
+              await resumeHistoryRepository.recordBeforeUpdate(
+                savedCurrent,
+                restored,
+                'source',
+                true,
               )
-              setDirty(false)
-              setSavedAt(new Date())
-              setSaveError(false)
-            }}
-          />
-        ) : null}
+            } else {
+              await resumeHistoryRepository.recordBeforeUpdate(
+                resume,
+                restored,
+                'source',
+                true,
+              )
+            }
+            const saved = await resumeRepository.update({
+              ...restored,
+              updatedAt: new Date().toISOString(),
+            })
+            setDocuments((current) =>
+              current.map((item) => (item.id === saved.id ? saved : item)),
+            )
+            setDirty(false)
+            setSavedAt(new Date())
+            setSaveError(false)
+          }}
+        />
         <span className="save-status">
           <span className="status-dot" />
           {saveError

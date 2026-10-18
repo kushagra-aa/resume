@@ -199,7 +199,7 @@ function readZip(bytes: Uint8Array) {
 }
 
 function downloadBytes(bytes: Uint8Array, filename: string) {
-  const blob = new Blob([bytes.slice().buffer as ArrayBuffer], {
+  const blob = new Blob([bytes.slice().buffer], {
     type: 'application/zip',
   })
   const url = URL.createObjectURL(blob)
