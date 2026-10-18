@@ -1,5 +1,4 @@
 import { resumeRepository } from '#/db/repositories/resume-repository'
-import { createStarterDocument } from '#/features/templates/starter-template'
 import type { ResumeDocument } from '#/models/resume'
 import { safeParseResumeDocument } from '#/schemas/resume'
 
@@ -38,7 +37,5 @@ export async function loadResumes(): Promise<ResumeDocument[]> {
     return resumeRepository.list()
   }
 
-  const starter = createStarterDocument()
-  await resumeRepository.create(starter)
-  return [starter]
+  return []
 }

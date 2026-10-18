@@ -16,15 +16,14 @@ describe('resume storage startup behavior', () => {
     })
   })
 
-  it('creates one starter resume when storage is empty', async () => {
+  it('does not create a resume when storage is empty', async () => {
     const resumes = await loadResumes()
 
-    expect(resumes).toHaveLength(1)
-    expect(resumes[0]?.html).toContain('<main class="resume">')
-    expect(await resumeDatabase.documents.count()).toBe(1)
+    expect(resumes).toEqual([])
+    expect(await resumeDatabase.documents.count()).toBe(0)
   })
 
-  it('ignores malformed legacy data and recovers with a starter', async () => {
+  it('ignores malformed legacy data without creating a resume', async () => {
     vi.stubGlobal('window', {
       localStorage: {
         getItem: vi.fn(() => '{not valid json'),
@@ -33,8 +32,8 @@ describe('resume storage startup behavior', () => {
 
     const resumes = await loadResumes()
 
-    expect(resumes).toHaveLength(1)
-    expect(await resumeDatabase.documents.count()).toBe(1)
+    expect(resumes).toEqual([])
+    expect(await resumeDatabase.documents.count()).toBe(0)
   })
 
   it('migrates valid MVP localStorage documents without changing their source', async () => {
