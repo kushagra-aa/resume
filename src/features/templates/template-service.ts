@@ -18,6 +18,7 @@ const templateDefinitions = [
   { id: 'modern', path: '/templates/modern' },
   { id: 'minimal', path: '/templates/minimal' },
   { id: 'traditional', path: '/templates/traditional' },
+  { id: 'slate', path: '/templates/slate' },
 ] as const
 
 async function readJson<T>(path: string): Promise<T> {

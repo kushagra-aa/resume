@@ -1,0 +1,32 @@
+{
+  "name": "Your Name",
+  "title": "Professional Title",
+  "summary": "A concise professional summary describing your strengths, experience, and the kind of work you do.",
+  "email": "you@example.com",
+  "phone": "+1 555 555 5555",
+  "location": "City, Country",
+  "experience": [
+    {
+      "role": "Software Engineer",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "Remote",
+      "bullets": [
+        "Built and shipped reliable product features.",
+        "Collaborated with product and engineering teams."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "dates": "2024",
+      "description": "A useful project description with measurable outcomes.",
+      "bullets": []
+    }
+  ],
+  "skills": ["TypeScript", "React", "Node.js", "PostgreSQL", "Cloudflare"],
+  "education": [],
+  "certifications": [],
+  "customSections": []
+}

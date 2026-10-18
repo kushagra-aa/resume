@@ -1,0 +1,131 @@
+<main class="resume">
+  <header class="resume-header">
+    <div class="identity">
+      <h1>{{name}}</h1>
+      {{#title}}
+      <p class="role-title">{{title}}</p>
+      {{/title}} {{#sectionVisibility.summary}}
+      <p class="summary">{{summary}}</p>
+      {{/sectionVisibility.summary}}
+    </div>
+    {{#sectionVisibility.personal}}
+    <div class="contact">
+      {{#contactDetails}}<span class="contact-detail"
+        >{{value}}{{#iconSvg}}<span
+          class="contact-detail-icon"
+          aria-hidden="true"
+          >{{{iconSvg}}}</span
+        >{{/iconSvg}}</span
+      >{{/contactDetails}} {{#links}}<a
+        href="{{href}}"
+        aria-label="{{label}}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >{{#iconSvg}}<span class="contact-link-icon" aria-hidden="true"
+          >{{{iconSvg}}}</span
+        >{{/iconSvg}}{{label}}</a
+      >{{/links}}
+    </div>
+    {{/sectionVisibility.personal}}
+  </header>
+
+  <div class="resume-grid">
+    <section class="experience-column">
+      {{#sectionVisibility.experience}}
+      <section class="resume-section" data-resume-section="experience">
+        <h2>{{sectionTitles.experience}}</h2>
+        {{#experience}}
+        <article class="role">
+          {{#hasHeading}}
+          <h3>{{heading}}</h3>
+          {{/hasHeading}} {{#hasMeta}}
+          <p class="role-meta">{{meta}}</p>
+          {{/hasMeta}} {{#hasBullets}}
+          <ul>
+            {{#bullets}}
+            <li>{{value}}</li>
+            {{/bullets}}
+          </ul>
+          {{/hasBullets}}
+        </article>
+        {{/experience}}
+      </section>
+      {{/sectionVisibility.experience}} {{#sectionVisibility.projects}}
+      <section class="resume-section" data-resume-section="projects">
+        <h2>{{sectionTitles.projects}}</h2>
+        {{#projects}}
+        <article class="project">
+          {{#hasHeading}}
+          <h3>{{heading}}</h3>
+          {{/hasHeading}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}} {{#hasBullets}}
+          <ul>
+            {{#bullets}}
+            <li>{{value}}</li>
+            {{/bullets}}
+          </ul>
+          {{/hasBullets}}
+        </article>
+        {{/projects}}
+      </section>
+      {{/sectionVisibility.projects}}
+    </section>
+
+    <aside class="details-column">
+      {{#sectionVisibility.skills}}
+      <section class="resume-section" data-resume-section="skills">
+        <h2>{{sectionTitles.skills}}</h2>
+        <div class="skill-list">
+          {{#skills}}<span>{{value}}</span>{{/skills}}
+        </div>
+      </section>
+      {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
+      <section class="resume-section" data-resume-section="education">
+        <h2>{{sectionTitles.education}}</h2>
+        {{#education}}
+        <article class="aside-item">
+          {{#hasHeading}}
+          <h3>{{heading}}</h3>
+          {{/hasHeading}} {{#hasMeta}}
+          <p>{{meta}}</p>
+          {{/hasMeta}} {{#hasDetails}}
+          <p>{{details}}</p>
+          {{/hasDetails}}
+        </article>
+        {{/education}}
+      </section>
+      {{/sectionVisibility.education}} {{#sectionVisibility.certifications}}
+      <section class="resume-section" data-resume-section="certifications">
+        <h2>{{sectionTitles.certifications}}</h2>
+        {{#certifications}}
+        <article class="aside-item">
+          {{#hasName}}
+          <h3>{{name}}</h3>
+          {{/hasName}} {{#hasMeta}}
+          <p>{{meta}}</p>
+          {{/hasMeta}}
+        </article>
+        {{/certifications}}
+      </section>
+      {{/sectionVisibility.certifications}}
+      {{#sectionVisibility.customSections}}{{#customSections}}
+      <section class="resume-section" data-resume-section="customSections">
+        {{#hasTitle}}
+        <h2>{{title}}</h2>
+        {{/hasTitle}} {{#items}}
+        <article class="aside-item">
+          {{#hasTitle}}
+          <h3>{{title}}</h3>
+          {{/hasTitle}} {{#hasMeta}}
+          <p>{{meta}}</p>
+          {{/hasMeta}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}}
+        </article>
+        {{/items}}
+      </section>
+      {{/customSections}}{{/sectionVisibility.customSections}}
+    </aside>
+  </div>
+</main>

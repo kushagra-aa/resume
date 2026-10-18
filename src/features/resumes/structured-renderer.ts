@@ -11,6 +11,7 @@ import { renderTemplate } from '../templates/template-renderer'
 import { loadTemplates } from '../templates/template-service'
 import type { ResumeTemplate, TemplateData } from '../templates/template-types'
 import {
+  contactDetailIconSvg,
   inferContactLink,
   linkForTemplate,
   safeContactHref,
@@ -88,6 +89,7 @@ export function createStructuredTemplateData(
   resume: StructuredResume,
 ): StructuredTemplateData {
   const { selection } = resume
+  const showLinkIcons = resume.templateConfiguration.showLinkIcons !== false
   const selected = (section: ProfileSectionKey, id?: string) =>
     isSelected(selection, section, id)
   const legacyLinkKeys = {
@@ -109,12 +111,7 @@ export function createStructuredTemplateData(
   }
   const links = orderItems(profile.links, 'personal', resume)
     .filter((link) => selected('personal', `link:${link.id}`))
-    .map((link) =>
-      linkForTemplate(
-        link,
-        resume.templateConfiguration.showLinkIcons !== false,
-      ),
-    )
+    .map((link) => linkForTemplate(link, showLinkIcons))
     .filter((link) => link.href)
   const experience = selected('experience')
     ? orderItems(profile.experience, 'experience', resume)
@@ -315,13 +312,12 @@ export function createStructuredTemplateData(
     linkedin: personalValue('linkedin'),
     github: personalValue('github'),
     links,
-    contactDetails: [
-      personalValue('location'),
-      personalValue('email'),
-      personalValue('phone'),
-    ]
-      .filter((value) => value.trim())
-      .map((value) => ({ value })),
+    contactDetails: (['location', 'email', 'phone'] as const)
+      .map((key) => ({
+        value: personalValue(key),
+        iconSvg: showLinkIcons ? contactDetailIconSvg(key) : '',
+      }))
+      .filter((item) => item.value.trim()),
     summary: selected('summary') ? profile.summary : '',
     sectionTitles: Object.fromEntries(
       [
