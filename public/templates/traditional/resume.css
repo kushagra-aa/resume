@@ -1,0 +1,129 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+:root {
+  color: #151515;
+  font-family: var(--resume-font-family, Georgia, 'Times New Roman', serif);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fff;
+}
+.resume {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: var(--resume-page-margin, 16mm);
+}
+.resume-header {
+  text-align: center;
+}
+.resume-header > h1 {
+  display: inline-block;
+  margin: 0 0 7mm;
+  padding-bottom: 1mm;
+  border-bottom: 1px solid currentColor;
+  font-size: 25px;
+  letter-spacing: 0.02em;
+}
+.identity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8mm;
+  text-align: left;
+}
+.identity-copy {
+  min-width: 0;
+}
+.name {
+  margin: 0 0 1mm;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+.contact-line {
+  margin: 0;
+  font-size: var(--resume-font-size, 10.5pt);
+  line-height: 1.35;
+}
+.role-title {
+  margin: 0;
+  max-width: 58mm;
+  font-size: 11pt;
+  font-style: italic;
+  text-align: right;
+}
+a {
+  color: inherit;
+}
+section {
+  margin-top: var(--resume-section-spacing, 7mm);
+}
+.band-heading {
+  margin: 0 0 4mm;
+  padding: 1mm 2mm 1.5mm;
+  background: var(--resume-band-color, #c7c7c7);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.1;
+  text-decoration: underline;
+}
+.objective {
+  max-width: 174mm;
+  margin: 0 auto;
+  text-align: center;
+}
+article {
+  margin: 0 0 4mm;
+}
+h3 {
+  margin: 0;
+  font-size: 12.5pt;
+  font-weight: 700;
+}
+p,
+li {
+  font-size: var(--resume-font-size, 10.5pt);
+  line-height: var(--resume-line-spacing, 1.4);
+}
+p {
+  margin: 1mm 0 0;
+}
+.meta {
+  margin-top: 0.5mm;
+  font-style: italic;
+}
+ul {
+  margin: 2mm 0 0;
+  padding-left: 7mm;
+}
+li {
+  margin: 1mm 0;
+}
+.inline-list {
+  columns: 2;
+  margin-top: 0;
+}
+.inline-list li {
+  break-inside: avoid;
+}
+
+@media print {
+  .resume-header,
+  article,
+  section {
+    break-inside: avoid;
+  }
+}

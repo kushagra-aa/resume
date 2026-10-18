@@ -1,0 +1,30 @@
+{
+  "name": "Your Name",
+  "title": "Professional Title",
+  "summary": "A concise career objective or professional summary describing the kind of work you want to do and the value you bring.",
+  "email": "you@example.com",
+  "phone": "+1 555 555 5555",
+  "location": "City, Country",
+  "experience": [
+    {
+      "role": "Professional Role",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "Location",
+      "bullets": [
+        "Describe a meaningful responsibility or result.",
+        "Add another concise accomplishment or contribution."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "heading": "Degree · Institution",
+      "meta": "Year · Location",
+      "details": "Optional qualification details"
+    }
+  ],
+  "skills": ["Skill one", "Skill two", "Skill three"],
+  "projects": [],
+  "customSections": []
+}

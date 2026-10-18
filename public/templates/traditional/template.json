@@ -1,0 +1,72 @@
+{
+  "id": "traditional",
+  "name": "Traditional",
+  "description": "A formal, serif resume inspired by classic printed formats with gray section bands.",
+  "version": "1.0.0",
+  "controls": [
+    {
+      "key": "fontFamily",
+      "label": "Font family",
+      "type": "select",
+      "variable": "--resume-font-family",
+      "options": [
+        {
+          "label": "Classic serif",
+          "value": "Georgia, 'Times New Roman', serif"
+        },
+        { "label": "Times serif", "value": "'Times New Roman', Times, serif" }
+      ],
+      "defaultValue": "Georgia, 'Times New Roman', serif"
+    },
+    {
+      "key": "fontSize",
+      "label": "Font size",
+      "type": "range",
+      "variable": "--resume-font-size",
+      "min": 9,
+      "max": 12,
+      "step": 0.5,
+      "unit": "pt",
+      "defaultValue": 10.5
+    },
+    {
+      "key": "bandColor",
+      "label": "Section band color",
+      "type": "color",
+      "variable": "--resume-band-color",
+      "defaultValue": "#c7c7c7"
+    },
+    {
+      "key": "pageMargin",
+      "label": "Page margin",
+      "type": "range",
+      "variable": "--resume-page-margin",
+      "min": 12,
+      "max": 25,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 16
+    },
+    {
+      "key": "sectionSpacing",
+      "label": "Section spacing",
+      "type": "range",
+      "variable": "--resume-section-spacing",
+      "min": 4,
+      "max": 14,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 7
+    },
+    {
+      "key": "lineSpacing",
+      "label": "Line spacing",
+      "type": "range",
+      "variable": "--resume-line-spacing",
+      "min": 1.2,
+      "max": 1.8,
+      "step": 0.05,
+      "defaultValue": 1.4
+    }
+  ]
+}
