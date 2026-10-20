@@ -1,0 +1,40 @@
+{
+  "name": "Your Name",
+  "title": "Art Director",
+  "summary": "Designer with +10 years of experience in UX / UI Design. Skilled at creating thoughtful digital experiences and passionate about clear, useful design.",
+  "email": "name@gmail.com",
+  "phone": "+43 664 123 123",
+  "location": "Vienna, AT",
+  "website": "www.website.design",
+  "experience": [
+    {
+      "role": "UI Designer",
+      "company": "Some Studio",
+      "dates": "2020 – Present",
+      "location": "Vienna, AT",
+      "bullets": [
+        "Successfully translated subject matter into concrete design for newsletters, promotional materials, and sales collateral."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "UX / UI Design Masterclass Degree",
+      "institution": "Talent Garden",
+      "dates": "2005 – 2010",
+      "location": "Vienna, AT",
+      "details": ""
+    }
+  ],
+  "skills": [
+    "Figma",
+    "HTML/CSS",
+    "Sketch App",
+    "Premiere Pro",
+    "Adobe Photoshop",
+    "After Effects",
+    "Adobe Illustrator"
+  ],
+  "projects": [],
+  "customSections": []
+}

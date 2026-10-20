@@ -18,9 +18,9 @@ import { BackButton } from '#/components/back-button'
 import { ResumeHistoryDialog } from '#/components/resume-history-dialog'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { profileRepository } from '#/db/repositories/profile-repository'
+import { resumeHistoryRepository } from '#/db/repositories/resume-history-repository'
 import { resumeRepository } from '#/db/repositories/resume-repository'
 import { structuredResumeRepository } from '#/db/repositories/structured-resume-repository'
-import { resumeHistoryRepository } from '#/db/repositories/resume-history-repository'
 import { inferContactLink } from '#/features/profiles/contact-links'
 import { createResumeSrcDoc } from '#/features/resume/runtime'
 import { exportResumePackage } from '#/features/resume/source-package'
@@ -29,7 +29,6 @@ import {
   defaultSectionOrderForTemplate,
 } from '#/features/resumes/create-structured-resume'
 import { renderStructuredResume } from '#/features/resumes/structured-renderer'
-import { parseStructuredResume } from '#/schemas/structured-resume'
 import { createTemplatePreviewDocument } from '#/features/templates/template-preview'
 import { loadTemplates } from '#/features/templates/template-service'
 import type { ResumeTemplate } from '#/features/templates/template-types'
@@ -39,6 +38,7 @@ import type {
   ProfileSectionKey,
   StructuredResume,
 } from '#/models/structured-resume'
+import { parseStructuredResume } from '#/schemas/structured-resume'
 
 const sectionLabels: Record<ProfileSectionKey, string> = {
   personal: 'Personal information',
@@ -179,7 +179,7 @@ function StructuredResumeBuilder() {
   >('all')
   const [orderItemsSection, setOrderItemsSection] =
     useState<ProfileSectionKey>('experience')
-  const [templateSectionOpen, setTemplateSectionOpen] = useState(true)
+  const [templateSectionOpen, setTemplateSectionOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [previewZoom, setPreviewZoom] = useState(100)
 

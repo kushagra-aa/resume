@@ -1,0 +1,290 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+:root {
+  color: var(--resume-accent, #252525);
+  font-family: var(--resume-font-family, Arial, Helvetica, sans-serif);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+}
+
+.resume {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: var(--resume-page-margin, 15mm);
+  background: #fff;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: var(--resume-sidebar-width, 78mm) minmax(0, 1fr);
+  gap: 10mm;
+  align-items: stretch;
+}
+
+.resume-header {
+  min-width: 0;
+  padding: 2mm 0 7mm;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.header-details {
+  display: grid;
+  grid-template-columns: var(--resume-sidebar-width, 78mm) minmax(0, 1fr);
+  align-items: start;
+  gap: 0;
+  padding-top: 5mm;
+  margin-top: 6mm;
+  border-top: 1px solid #e4e4e4;
+}
+
+.header-identity,
+.header-summary,
+.header-contact,
+.sidebar,
+.content,
+.item-copy {
+  min-width: 0;
+}
+
+.header-summary {
+  padding: 0 6mm 0 0;
+}
+
+.header-identity h1 {
+  margin: 0;
+  color: var(--resume-accent, #252525);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.title {
+  margin: 2.5mm 0 0;
+  color: var(--resume-muted, #858585);
+  font-size: var(--resume-font-size, 9pt);
+  letter-spacing: 0.1em;
+}
+
+.header-contact {
+  padding-left: 10mm;
+  border-left: 1px solid #e4e4e4;
+  color: var(--resume-muted, #858585);
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.5;
+}
+
+.header-details > :only-child {
+  grid-column: 1 / -1;
+}
+
+.header-details > .header-contact:only-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.header-summary h2 {
+  margin: 0 0 3mm;
+  font-size: 11.5pt;
+}
+
+.header-summary p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.contact-values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(38mm, 1fr));
+  align-items: start;
+  gap: 2mm 6mm;
+  width: 100%;
+}
+
+.contact-item {
+  display: inline-flex;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--resume-muted, #858585);
+  line-height: 1.45;
+}
+
+.contact-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 5mm;
+  margin-top: 0.5mm;
+  margin-right: 2mm;
+  color: var(--resume-accent, #252525);
+}
+
+.contact-icon svg {
+  display: block;
+  width: 4mm;
+  height: 4mm;
+}
+
+.contact-item-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.sidebar {
+  padding-right: 8mm;
+  border-right: 1px solid #e4e4e4;
+}
+
+.sidebar-section,
+.content-section {
+  margin-top: 7mm;
+}
+
+.sidebar-section + .sidebar-section,
+.content-section + .content-section {
+  margin-top: 8mm;
+}
+
+h2 {
+  margin: 0 0 4mm;
+  color: var(--resume-accent, #252525);
+  font-size: 11.5pt;
+  font-weight: 700;
+}
+
+h3 {
+  margin: 0;
+  color: var(--resume-accent, #252525);
+  font-size: var(--resume-font-size, 9pt);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+p,
+li,
+.skill-values {
+  color: var(--resume-muted, #858585);
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.55;
+}
+
+p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  margin-top: 1mm;
+}
+
+.item-row,
+.experience-item {
+  display: grid;
+  grid-template-columns: 12mm minmax(0, 1fr);
+  gap: 5mm;
+}
+
+.education-item {
+  margin-bottom: 6mm;
+}
+
+.item-date {
+  color: var(--resume-muted, #858585);
+  font-size: calc(var(--resume-font-size, 9pt) - 0.5pt);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.item-copy p {
+  margin-top: 1.5mm;
+}
+
+.skill-group {
+  padding-bottom: 3.5mm;
+  margin-bottom: 3.5mm;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.skill-group:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.skill-group h3 {
+  margin-bottom: 1.5mm;
+  font-size: calc(var(--resume-font-size, 9pt) - 0.25pt);
+  letter-spacing: 0.02em;
+}
+
+.skill-values {
+  column-count: 2;
+  column-gap: 7mm;
+}
+
+.skill-values span {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 1mm;
+}
+
+.skill-values span,
+.content li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.experience-item {
+  padding-bottom: 6mm;
+  margin-bottom: 6mm;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.experience-item:last-child {
+  margin-bottom: 0;
+}
+
+.content ul {
+  margin: 2mm 0 0;
+  padding-left: 4mm;
+}
+
+.content li {
+  margin: 1mm 0;
+}
+
+.compact-item {
+  margin-bottom: 5mm;
+}
+
+@media print {
+  .resume-header,
+  .sidebar-section,
+  .content-section,
+  article {
+    break-inside: avoid;
+  }
+}

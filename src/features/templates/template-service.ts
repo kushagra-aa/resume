@@ -22,6 +22,7 @@ const templateDefinitions = [
   { id: 'editorial', path: '/templates/editorial' },
   { id: 'navy-sidebar', path: '/templates/navy-sidebar' },
   { id: 'profile-timeline', path: '/templates/profile-timeline' },
+  { id: 'split-column', path: '/templates/split-column' },
 ] as const
 
 async function readJson<T>(path: string): Promise<T> {

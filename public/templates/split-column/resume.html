@@ -1,0 +1,158 @@
+<main class="resume">
+  <header class="resume-header">
+    <div class="header-identity">
+      <h1>{{name}}</h1>
+      {{#title}}
+      <p class="title">{{title}}</p>
+      {{/title}}
+    </div>
+
+    <div class="header-details">
+      {{#sectionVisibility.summary}}
+      <section class="header-summary">
+        <p>{{summary}}</p>
+      </section>
+      {{/sectionVisibility.summary}} {{#sectionVisibility.personal}}
+      <section class="header-contact">
+        <div class="contact-values">
+          {{#contactDetails}}
+          <span class="contact-item">
+            {{#iconSvg}}
+            <span class="contact-icon" aria-hidden="true">{{{iconSvg}}}</span>
+            {{/iconSvg}}
+            <span class="contact-item-value">{{value}}</span>
+          </span>
+          {{/contactDetails}} {{#links}}
+          <a
+            class="contact-item"
+            href="{{href}}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{#iconSvg}}
+            <span class="contact-icon" aria-hidden="true">{{{iconSvg}}}</span>
+            {{/iconSvg}}
+            <span class="contact-item-value">{{label}}</span>
+          </a>
+          {{/links}}
+        </div>
+      </section>
+      {{/sectionVisibility.personal}}
+    </div>
+  </header>
+
+  <div class="resume-grid">
+    <aside class="sidebar">
+      {{#sectionVisibility.education}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.education}}</h2>
+        {{#education}}
+        <article class="education-item">
+          <div class="item-row">
+            {{#hasDates}}<span class="item-date">{{dates}}</span>{{/hasDates}}
+            <div class="item-copy">
+              {{#institution}}
+              <h3>{{institution}}</h3>
+              {{/institution}} {{#degree}}
+              <p>{{degree}}</p>
+              {{/degree}} {{#hasDetails}}
+              <p>{{details}}</p>
+              {{/hasDetails}}
+            </div>
+          </div>
+        </article>
+        {{/education}}
+      </section>
+      {{/sectionVisibility.education}} {{#sectionVisibility.skills}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.skills}}</h2>
+        {{#skillGroups}}
+        <div class="skill-group">
+          {{#hasName}}
+          <h3>{{name}}</h3>
+          {{/hasName}}
+          <div class="skill-values">
+            {{#skills}}<span>{{value}}</span>{{/skills}}
+          </div>
+        </div>
+        {{/skillGroups}}
+      </section>
+      {{/sectionVisibility.skills}} {{#sectionVisibility.projects}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.projects}}</h2>
+        {{#projects}}
+        <article class="compact-item">
+          {{#hasHeading}}
+          <h3>{{heading}}</h3>
+          {{/hasHeading}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}} {{#hasBullets}}
+          <ul>
+            {{#bullets}}
+            <li>{{value}}</li>
+            {{/bullets}}
+          </ul>
+          {{/hasBullets}}
+        </article>
+        {{/projects}}
+      </section>
+      {{/sectionVisibility.projects}} {{#sectionVisibility.awards}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.awards}}</h2>
+        {{#awards}}
+        <article class="compact-item">
+          {{#hasHeading}}
+          <h3>{{name}}</h3>
+          {{/hasHeading}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}} {{#meta}}
+          <p class="muted">{{meta}}</p>
+          {{/meta}}
+        </article>
+        {{/awards}}
+      </section>
+      {{/sectionVisibility.awards}}
+    </aside>
+
+    <section class="content">
+      {{#sectionVisibility.experience}}
+      <section class="content-section">
+        <h2>{{sectionTitles.experience}}</h2>
+        {{#experience}}
+        <article class="experience-item">
+          <div class="item-date">{{dates}}</div>
+          <div class="item-copy">
+            {{#hasHeading}}
+            <h3>{{heading}}</h3>
+            {{/hasHeading}} {{#hasMeta}}
+            <p class="muted">{{location}}</p>
+            {{/hasMeta}} {{#hasBullets}}
+            <ul>
+              {{#bullets}}
+              <li>{{value}}</li>
+              {{/bullets}}
+            </ul>
+            {{/hasBullets}}
+          </div>
+        </article>
+        {{/experience}}
+      </section>
+      {{/sectionVisibility.experience}} {{#sectionVisibility.customSections}}
+      {{#customSections}}
+      <section class="content-section">
+        {{#hasTitle}}
+        <h2>{{title}}</h2>
+        {{/hasTitle}} {{#items}}
+        <article class="compact-item">
+          {{#hasTitle}}
+          <h3>{{title}}</h3>
+          {{/hasTitle}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}}
+        </article>
+        {{/items}}
+      </section>
+      {{/customSections}}{{/sectionVisibility.customSections}}
+    </section>
+  </div>
+</main>
