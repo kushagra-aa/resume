@@ -1,0 +1,30 @@
+{
+  "name": "Your Name",
+  "title": "Professional Title",
+  "summary": "A short professional profile describing your background, strengths, and the kind of work you enjoy.",
+  "email": "you@example.com",
+  "phone": "+1 555 555 5555",
+  "location": "City, Country",
+  "website": "example.com",
+  "experience": [
+    {
+      "role": "Product Designer",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "City",
+      "bullets": ["Designed and delivered user-focused product experiences."]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree",
+      "institution": "University Name",
+      "dates": "2018 – 2022",
+      "location": "City",
+      "details": ""
+    }
+  ],
+  "skills": ["Figma", "Research", "Prototyping", "Design systems"],
+  "projects": [],
+  "customSections": []
+}

@@ -1,0 +1,119 @@
+<main class="resume">
+  <header class="profile-header">
+    <div class="profile-intro">
+      <h2>Profile</h2>
+      {{#sectionVisibility.summary}}
+      <p>{{summary}}</p>
+      {{/sectionVisibility.summary}}
+    </div>
+  </header>
+
+  <div class="resume-grid">
+    <aside class="sidebar">
+      <section class="sidebar-section identity-section">
+        <h1>{{name}}</h1>
+        {{#title}}
+        <p class="title">{{title}}</p>
+        {{/title}}
+      </section>
+
+      {{#sectionVisibility.personal}}
+      <section class="sidebar-section contact-section">
+        {{#contactDetails}}
+        <p class="contact-item">
+          {{#iconSvg}}<span class="contact-icon" aria-hidden="true"
+            >{{{iconSvg}}}</span
+          >{{/iconSvg}}
+          <span>{{value}}</span>
+        </p>
+        {{/contactDetails}} {{#links}}
+        <p class="contact-item">
+          {{#iconSvg}}<span class="contact-icon" aria-hidden="true"
+            >{{{iconSvg}}}</span
+          >{{/iconSvg}}
+          <a href="{{href}}" target="_blank" rel="noopener noreferrer"
+            >{{label}}</a
+          >
+        </p>
+        {{/links}}
+      </section>
+      {{/sectionVisibility.personal}} {{#sectionVisibility.skills}}
+      <section class="sidebar-section skills-section">
+        <h2>{{sectionTitles.skills}}</h2>
+        {{#skillGroups}}
+        <p class="skill-group">
+          {{#hasName}}<strong>{{name}}:</strong> {{/hasName}}
+          <span class="skill-values"
+            >{{#skills}}<span>{{value}}</span>{{/skills}}</span
+          >
+        </p>
+        {{/skillGroups}}
+      </section>
+      {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.education}}</h2>
+        {{#education}}
+        <article class="sidebar-entry">
+          <div class="sidebar-entry-heading">
+            {{#hasHeading}}
+            <h3>{{heading}}</h3>
+            {{/hasHeading}} {{#hasDates}}<span>{{dates}}</span>{{/hasDates}}
+          </div>
+          {{#hasMeta}}
+          <p>{{meta}}</p>
+          {{/hasMeta}} {{#hasDetails}}
+          <p>{{details}}</p>
+          {{/hasDetails}}
+        </article>
+        {{/education}}
+      </section>
+      {{/sectionVisibility.education}} {{#sectionVisibility.projects}}
+      <section class="sidebar-section">
+        <h2>{{sectionTitles.projects}}</h2>
+        {{#projects}}
+        <article class="sidebar-entry">
+          {{#hasHeading}}
+          <h3>{{heading}}</h3>
+          {{/hasHeading}} {{#hasDescription}}
+          <p>{{description}}</p>
+          {{/hasDescription}} {{#hasBullets}}
+          <ul>
+            {{#bullets}}
+            <li>{{value}}</li>
+            {{/bullets}}
+          </ul>
+          {{/hasBullets}}
+        </article>
+        {{/projects}}
+      </section>
+      {{/sectionVisibility.projects}}
+    </aside>
+
+    <div class="content">
+      {{#sectionVisibility.experience}}
+      <section class="content-section">
+        <h2>{{sectionTitles.experience}}</h2>
+        {{#experience}}
+        <article class="experience-item">
+          <div class="experience-heading">
+            {{#hasHeading}}
+            <h3>{{heading}}</h3>
+            {{/hasHeading}} {{#hasDates}}<span class="item-date">{{dates}}</span
+            >{{/hasDates}}
+          </div>
+          {{#hasMeta}}
+          <p class="meta">{{meta}}</p>
+          {{/hasMeta}} {{#hasBullets}}
+          <ul>
+            {{#bullets}}
+            <li>{{value}}</li>
+            {{/bullets}}
+          </ul>
+          {{/hasBullets}}
+        </article>
+        {{/experience}}
+      </section>
+      {{/sectionVisibility.experience}}
+    </div>
+  </div>
+</main>

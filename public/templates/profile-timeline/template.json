@@ -1,0 +1,72 @@
+{
+  "id": "profile-timeline",
+  "name": "Profile Timeline",
+  "description": "A spacious two-column resume with a profile header, contact sidebar, and timeline-style experience.",
+  "version": "1.0.0",
+  "controls": [
+    {
+      "key": "fontFamily",
+      "label": "Font family",
+      "type": "select",
+      "variable": "--resume-font-family",
+      "options": [
+        {
+          "label": "Clean sans-serif",
+          "value": "Arial, Helvetica, sans-serif"
+        },
+        {
+          "label": "System sans-serif",
+          "value": "Inter, ui-sans-serif, system-ui, sans-serif"
+        }
+      ],
+      "defaultValue": "Arial, Helvetica, sans-serif"
+    },
+    {
+      "key": "accentColor",
+      "label": "Accent color",
+      "type": "color",
+      "variable": "--resume-accent",
+      "defaultValue": "#252525"
+    },
+    {
+      "key": "mutedColor",
+      "label": "Muted text color",
+      "type": "color",
+      "variable": "--resume-muted",
+      "defaultValue": "#969696"
+    },
+    {
+      "key": "fontSize",
+      "label": "Font size",
+      "type": "range",
+      "variable": "--resume-font-size",
+      "min": 8.5,
+      "max": 11,
+      "step": 0.5,
+      "unit": "pt",
+      "defaultValue": 9
+    },
+    {
+      "key": "pageMargin",
+      "label": "Page margin",
+      "type": "range",
+      "variable": "--resume-page-margin",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 15
+    },
+    {
+      "key": "sidebarWidth",
+      "label": "Sidebar width",
+      "type": "range",
+      "variable": "--resume-sidebar-width",
+      "min": 55,
+      "max": 85,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 78
+    }
+  ]
+}
