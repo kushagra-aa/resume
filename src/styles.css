@@ -448,8 +448,9 @@ pre code {
 
 .profile-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 1rem;
+  min-width: 0;
 }
 
 .profile-card {
@@ -480,10 +481,19 @@ pre code {
 }
 
 .profile-card-actions {
+  align-items: center;
   border-top: 1px solid rgba(23, 58, 64, 0.14);
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   padding-top: 0.7rem;
+}
+
+.profile-card-actions > .button {
+  flex: 1 1 5.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .profile-danger-action,
@@ -584,7 +594,10 @@ pre code {
   z-index: 20;
   margin: -0.5rem -0.25rem 1.25rem;
   padding: 0.8rem 0.25rem;
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgba(12, 30, 33, 0.12);
   backdrop-filter: blur(14px);
 }
 
@@ -1007,6 +1020,7 @@ button.profile-remove:focus-visible {
   }
 
   .profile-section-nav {
+    --paper: linear-gradient(165deg, var(--surface-strong), var(--surface));
     z-index: 10;
     top: 4.5rem;
     display: flex;
@@ -1974,10 +1988,7 @@ button.profile-remove:focus-visible {
   .builder-sidebar-toggle,
   .structured-builder-layout[data-sidebar-collapsed='true']
     .builder-sidebar-toggle {
-    left: auto;
-    right: 0.85rem;
-    top: 3.15rem;
-    transform: none;
+    display: none;
   }
 
   .builder-mobile-tabs {
@@ -2027,9 +2038,47 @@ button.profile-remove:focus-visible {
 
 @media (max-width: 700px) {
   .structured-builder-header {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
     height: auto;
     padding-block: 0.65rem;
+  }
+
+  .structured-builder-header .app-header-left {
+    width: 100%;
+  }
+
+  .structured-builder-header .header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .structured-builder-header .builder-save-cluster {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .structured-builder-header .builder-export-menu,
+  .structured-builder-header .button-primary {
+    width: 100%;
+  }
+
+  .structured-builder-header .builder-export-menu > summary {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .structured-builder-header .theme-toggle {
+    grid-column: 2;
+    justify-self: end;
+    margin-left: 0;
   }
 
   .builder-preview-stage {
@@ -2043,19 +2092,6 @@ button.profile-remove:focus-visible {
 
   .builder-preview-tools {
     gap: 0.4rem;
-  }
-
-  .structured-builder-header > .button,
-  .structured-builder-header > .resume-history-control,
-  .structured-builder-header .builder-save-cluster,
-  .structured-builder-header .builder-export-menu {
-    flex: 1 1 calc(50% - 0.5rem);
-    justify-content: center;
-  }
-
-  .structured-builder-header .theme-toggle {
-    flex: 0 0 auto;
-    margin-left: auto;
   }
 
   .resume-history-list li {
@@ -2084,8 +2120,9 @@ button.profile-remove:focus-visible {
 
 .resume-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 16px;
+  min-width: 0;
 }
 
 .resume-card {
@@ -2121,10 +2158,17 @@ button.profile-remove:focus-visible {
 }
 
 .resume-card-actions {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 7px;
+}
+
+.resume-card-actions > .button {
+  flex: 1 1 7rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .resume-card-menu {
