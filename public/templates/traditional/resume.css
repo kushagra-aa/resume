@@ -112,12 +112,15 @@ ul {
 li {
   margin: 1mm 0;
 }
-.inline-list {
-  columns: 2;
-  margin-top: 0;
+.skill-group {
+  margin: 0 0 3mm;
+  line-height: 1.45;
 }
-.inline-list li {
-  break-inside: avoid;
+.skill-group strong {
+  font-weight: 700;
+}
+.skill-values span:not(:last-child)::after {
+  content: ', ';
 }
 
 @media print {

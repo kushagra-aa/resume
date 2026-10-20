@@ -1,0 +1,30 @@
+{
+  "name": "Your Name",
+  "title": "Professional Title",
+  "summary": "A concise professional summary describing your experience, strengths, and the value you bring.",
+  "email": "you@example.com",
+  "phone": "+1 555 555 5555",
+  "location": "City, Country",
+  "experience": [
+    {
+      "role": "Software Engineer",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "Remote",
+      "bullets": ["Built and shipped reliable product features."]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree",
+      "institution": "University Name",
+      "dates": "2018 – 2022",
+      "location": "",
+      "details": ""
+    }
+  ],
+  "skills": ["React", "TypeScript", "JavaScript", "CSS", "Node.js"],
+  "projects": [],
+  "awards": [],
+  "customSections": []
+}

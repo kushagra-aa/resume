@@ -1,0 +1,238 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+:root {
+  color: #282828;
+  font-family: var(--resume-font-family, Arial, Helvetica, sans-serif);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fff;
+}
+.resume {
+  display: grid;
+  grid-template-columns: var(--resume-sidebar-width, 67mm) minmax(0, 1fr);
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: var(--resume-page-margin, 0);
+  background: #fff;
+}
+.sidebar {
+  min-width: 0;
+  padding: 14mm 9mm 12mm;
+  color: #fff;
+  background: var(--resume-sidebar-color, #263f68);
+}
+.sidebar-header {
+  margin-bottom: 7mm;
+}
+.sidebar-header h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.sidebar-title {
+  margin: 1.5mm 0 0;
+  color: #ced7e5;
+  font-size: var(--resume-font-size, 9pt);
+}
+.sidebar-section {
+  margin-top: 6mm;
+}
+.contact-section {
+  margin-top: 0;
+}
+.sidebar h2 {
+  margin: 0 0 3mm;
+  font-size: 11pt;
+  font-weight: 700;
+}
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  min-width: 0;
+  margin: 0 0 2mm;
+  padding: 1.5mm 2mm;
+  border-radius: 2px;
+  color: #2f466b;
+  background: #edf0f4;
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.25;
+}
+.contact-item > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.contact-icon,
+.link-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 4mm;
+}
+.contact-icon svg,
+.link-icon svg {
+  display: block;
+  width: 4mm;
+  height: 4mm;
+}
+.sidebar-list,
+.sidebar-links {
+  margin: 0;
+  padding-left: 4mm;
+}
+.skill-group {
+  margin-bottom: 4mm;
+  color: #fff;
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.45;
+}
+.skill-group strong {
+  font-weight: 700;
+}
+.skill-values span:not(:last-child)::after {
+  content: ', ';
+}
+.sidebar-list li,
+.sidebar-links li {
+  margin: 1mm 0;
+  color: #f4f6f9;
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.35;
+}
+.sidebar-item {
+  margin-bottom: 3mm;
+}
+.sidebar-item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 3mm;
+}
+.sidebar-item h3,
+.sidebar-item-row span {
+  color: #fff;
+  font-size: var(--resume-font-size, 9pt);
+}
+.sidebar-item-row span {
+  flex: 0 0 auto;
+}
+.sidebar-item p {
+  margin: 1mm 0 0;
+  color: #d3dbe7;
+}
+.sidebar a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 1px;
+}
+.sidebar-links {
+  padding-left: 0;
+  list-style: none;
+}
+.sidebar-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 2mm;
+}
+
+.content {
+  min-width: 0;
+  padding: 13mm 13mm 13mm 10mm;
+}
+.content-section {
+  margin: 0 0 8mm;
+}
+.content h2 {
+  display: inline-block;
+  margin: 0 0 5mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 2px solid var(--resume-accent, #263f68);
+  color: var(--resume-accent, #263f68);
+  font-size: 12pt;
+  font-weight: 700;
+}
+.content p,
+.content li {
+  color: #777;
+  font-size: var(--resume-font-size, 9pt);
+  line-height: 1.35;
+}
+.about-section p {
+  max-width: 122mm;
+}
+.education-item {
+  display: grid;
+  grid-template-columns: 20mm minmax(0, 1fr);
+  gap: 5mm;
+  margin-bottom: 4mm;
+}
+.content-date {
+  color: #444;
+  font-size: var(--resume-font-size, 9pt);
+}
+.content-copy {
+  min-width: 0;
+}
+.content h3 {
+  margin: 0;
+  color: #2e2e2e;
+  font-size: 10pt;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.content h4 {
+  margin: 1mm 0 0;
+  color: #444;
+  font-size: var(--resume-font-size, 9pt);
+  font-weight: 700;
+}
+.content-copy p {
+  margin: 1mm 0 0;
+}
+.experience-item {
+  display: grid;
+  grid-template-columns: 7mm minmax(0, 1fr);
+  gap: 3mm;
+  margin-bottom: 5mm;
+}
+.experience-marker {
+  width: 5mm;
+  height: 5mm;
+  margin-top: 1mm;
+  border-radius: 1px;
+  background: var(--resume-accent, #263f68);
+}
+.experience-meta {
+  color: #444 !important;
+}
+.content ul {
+  margin: 2mm 0 0;
+  padding-left: 5mm;
+}
+.content li {
+  margin: 1mm 0;
+}
+.project-item {
+  margin-bottom: 4mm;
+}
+
+@media print {
+  .sidebar,
+  .content-section,
+  .experience-item,
+  .education-item {
+    break-inside: avoid;
+  }
+}

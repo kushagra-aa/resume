@@ -1,0 +1,31 @@
+{
+  "name": "Your Name",
+  "title": "Professional Title",
+  "summary": "A short profile describing your experience, strengths, and the kind of work you do.",
+  "email": "you@example.com",
+  "phone": "+1 555 555 5555",
+  "location": "City, Country",
+  "website": "example.com",
+  "experience": [
+    {
+      "role": "Designer",
+      "company": "Company Name",
+      "dates": "2022 – Present",
+      "location": "",
+      "bullets": ["Describe your contribution and its result."]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree",
+      "institution": "University Name",
+      "dates": "2018 – 2022",
+      "location": "",
+      "details": ""
+    }
+  ],
+  "skills": ["Skill one", "Skill two", "Skill three", "Skill four"],
+  "projects": [],
+  "certifications": [],
+  "customSections": []
+}

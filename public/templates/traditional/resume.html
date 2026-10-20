@@ -49,11 +49,14 @@
   {{/sectionVisibility.experience}} {{#sectionVisibility.skills}}
   <section data-resume-section="skills">
     <h2 class="band-heading">{{sectionTitles.skills}}</h2>
-    <ul class="inline-list">
-      {{#skills}}
-      <li>{{value}}</li>
-      {{/skills}}
-    </ul>
+    {{#skillGroups}}
+    <p class="skill-group">
+      {{#hasName}}<strong>{{name}}:</strong> {{/hasName}}
+      <span class="skill-values"
+        >{{#skills}}<span>{{value}}</span>{{/skills}}</span
+      >
+    </p>
+    {{/skillGroups}}
   </section>
   {{/sectionVisibility.skills}} {{#sectionVisibility.education}}
   <section data-resume-section="education">

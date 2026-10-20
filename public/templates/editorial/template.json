@@ -1,0 +1,72 @@
+{
+  "id": "editorial",
+  "name": "Editorial",
+  "description": "A quiet, spacious resume with thin dividers, compact typography, and a clean editorial rhythm.",
+  "version": "1.0.0",
+  "controls": [
+    {
+      "key": "fontFamily",
+      "label": "Font family",
+      "type": "select",
+      "variable": "--resume-font-family",
+      "options": [
+        {
+          "label": "Clean sans-serif",
+          "value": "Arial, Helvetica, sans-serif"
+        },
+        {
+          "label": "System sans-serif",
+          "value": "Inter, ui-sans-serif, system-ui, sans-serif"
+        }
+      ],
+      "defaultValue": "Arial, Helvetica, sans-serif"
+    },
+    {
+      "key": "fontSize",
+      "label": "Font size",
+      "type": "range",
+      "variable": "--resume-font-size",
+      "min": 9,
+      "max": 12,
+      "step": 0.5,
+      "unit": "pt",
+      "defaultValue": 10
+    },
+    {
+      "key": "ink",
+      "label": "Text color",
+      "type": "color",
+      "variable": "--resume-ink",
+      "defaultValue": "#292929"
+    },
+    {
+      "key": "muted",
+      "label": "Muted text color",
+      "type": "color",
+      "variable": "--resume-muted",
+      "defaultValue": "#7a7a7a"
+    },
+    {
+      "key": "pageMargin",
+      "label": "Page margin",
+      "type": "range",
+      "variable": "--resume-page-margin",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 14
+    },
+    {
+      "key": "sectionSpacing",
+      "label": "Section spacing",
+      "type": "range",
+      "variable": "--resume-section-spacing",
+      "min": 5,
+      "max": 14,
+      "step": 1,
+      "unit": "mm",
+      "defaultValue": 8
+    }
+  ]
+}

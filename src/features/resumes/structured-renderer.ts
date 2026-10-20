@@ -177,17 +177,23 @@ export function createStructuredTemplateData(
           ),
         )
     : []
-  const skills = selected('skills')
+  const skillGroups = selected('skills')
     ? orderItems(profile.skills, 'skills', resume)
         .filter((group) => selected('skills', group.id))
-        .flatMap((group) =>
-          group.skills.flatMap((value, index) =>
+        .map((group) => ({
+          name: group.name.trim(),
+          hasName: Boolean(group.name.trim()),
+          skills: group.skills.flatMap((value, index) =>
             selected('skills', `${group.id}:skill:${index}`) && value.trim()
-              ? [{ value: value.trim(), group: group.name.trim() }]
+              ? [{ value: value.trim() }]
               : [],
           ),
-        )
+        }))
+        .filter((group) => group.skills.length > 0)
     : []
+  const skills = skillGroups.flatMap((group) =>
+    group.skills.map((skill) => ({ value: skill.value, group: group.name })),
+  )
   const projects = selected('projects')
     ? orderItems(profile.projects, 'projects', resume)
         .filter((item) => selected('projects', item.id))
@@ -352,6 +358,7 @@ export function createStructuredTemplateData(
     experience,
     education,
     skills,
+    skillGroups,
     projects,
     certifications,
     awards,
