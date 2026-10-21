@@ -1195,6 +1195,13 @@ button.profile-remove:focus-visible {
   gap: 10px;
 }
 
+.browser-compatibility-copy {
+  margin: 0;
+  color: var(--sea-ink-soft);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
 .dialog-actions {
   display: flex;
   justify-content: flex-end;

@@ -11,6 +11,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
 import { ThemeSync } from '#/components/theme-toggle'
+import { BrowserCompatibilityNotice } from '#/components/browser-compatibility-notice'
 import type { QueryClient } from '@tanstack/react-query'
 
 interface MyRouterContext {
@@ -49,6 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeSync />
+        <BrowserCompatibilityNotice />
         {children}
         <TanStackDevtools
           config={{
