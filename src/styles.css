@@ -1992,7 +1992,7 @@ button.profile-remove:focus-visible {
     height: auto;
   }
 
-  .builder-sidebar-toggle,
+  button.builder-sidebar-toggle,
   .structured-builder-layout[data-sidebar-collapsed='true']
     .builder-sidebar-toggle {
     display: none;
